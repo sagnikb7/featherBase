@@ -40,7 +40,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', () => {
   // console.log('Unhandled rejection at ', promise, `reason: ${err.message}`)
   process.exit(1);
 });

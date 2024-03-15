@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import fs from 'fs';
-// TODO 
+// TODO
 // import { ProfilingIntegration } from '@sentry/profiling-node';
 import Sentry from '@sentry/node';
 import { ERROR } from '#constants/error.js';
