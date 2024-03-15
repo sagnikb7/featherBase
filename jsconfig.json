@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+	  "baseUrl": ".",
+	  "paths": {
+        "#config": ["./src/config.js"],
+        "#constants/*": ["./src/constants/*"],
+        "#logger": ["./src/utils/logger.js"],
+	    "#controllers/*": ["./src/controllers/*"],
+	    "#middlewares/*": ["./src/middlewares/*"],
+	    "#models/*": ["./src/models/*"],
+	    "#routes/*": ["./src/routes/*"],
+	    "#utils/*": ["./src/utils/*"],
+	    "#services/*": ["./src/services/*"],
+	    "#validators/*": ["./src/validators/*"],
+	  }
+	},
+	"exclude": ["node_modules"]
+}
+    

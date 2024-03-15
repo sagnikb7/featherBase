@@ -1,0 +1,17 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true
+    },
+    "extends": "airbnb-base",
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "rules": {
+        "max-len": [ "error", { "code": 120 }],
+        "import/no-unresolved": "off",
+        "import/extensions": "off"
+        // "object-curly-newline": [ "error","never"]
+    }
+}

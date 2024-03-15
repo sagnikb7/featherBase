@@ -1,0 +1,62 @@
+[
+    {
+        "Name": "Painted Bush Quail",
+        "Scientific name": "Perdicula erythrorhyncha",
+        "IUCN status": "VU",
+        "Habitat": "Dry forests, scrublands, grasslands",
+        "Distribution Range Size": "Restricted",
+        "Best seen at": "Central India, Eastern Ghats",
+        "Migration status": "Resident",
+        "Family of bird": "Quail",
+        "Rarity": "4",
+        "How to identify": "Brown upperparts with black and white markings, buff underparts with black barring. Male has rufous crown and face, black moustache, female is duller.",
+        "Primary colors": "Brown, buff, black, rufous",
+        "Size of the bird": "Small",
+        "Diet": "Seeds, insects"
+    },
+    {
+        "Name": "Himalayan Quail",
+        "Scientific name": "Ophrysia superciliosa",
+        "IUCN status": "LC",
+        "Habitat": "Alpine meadows, grasslands, rocky slopes",
+        "Distribution Range Size": "Large",
+        "Best seen at": "Himalayas, Tibetan Plateau",
+        "Migration status": "Resident",
+        "Family of bird": "Quail",
+        "Rarity": "3",
+        "How to identify": "Brown upperparts with darker streaks, rufous underparts with buff bars. Male has white eyebrow and black throat patch, female is duller.",
+        "Primary colors": "Brown, rufous, buff, black, white",
+        "Size of the bird": "Small",
+        "Diet": "Seeds, insects"
+    },
+    {
+        "Name": "Black Francolin",
+        "Scientific name": "Francolinus francolinus",
+        "IUCN status": "LC",
+        "Habitat": "Grasslands, scrublands, cultivated fields",
+        "Distribution Range Size": "Large",
+        "Best seen at": "Throughout India, Southeast Asia",
+        "Migration status": "Resident",
+        "Family of bird": "Francolin",
+        "Rarity": "2",
+        "How to identify": "Black plumage with white barring on wings and underparts. Male has white throat and red facial patch, female is duller.",
+        "Primary colors": "Black, white, red",
+        "Size of the bird": "Medium",
+        "Diet": "Seeds, insects, fruits"
+    },
+    {
+        "Name": "Painted Francolin",
+        "Scientific name": "Francolinus pictus",
+        "IUCN status": "LC",
+        "Habitat": "Dry forests, scrublands, grasslands",
+        "Distribution Range Size": "Moderate",
+        "Best seen at": "Central India, Eastern Ghats",
+        "Migration status": "Resident",
+        "Family of bird": "Francolin",
+        "Rarity": "3",
+        "How to identify": "Brown upperparts with black and white markings, buff underparts with black barring. Male has black head and neck with white streaks, red facial patch, female is duller.",
+        "Primary colors": "Brown, buff, black, white, red",
+        "Size of the bird": "Medium",
+        "Diet": "Seeds, insects, fruits"
+    }
+]
