@@ -34,7 +34,12 @@ const errorMiddleware = (app, debug) => {
 
   // not found middleware
   app.use((req, res, next) => {
-    res.status(404).json({ status: CONSTANTS.apiStatus.NOT_FOUND, error: { message: ERROR.commonError.NOT_FOUND } });
+    res.status(404).json(
+      {
+        status: CONSTANTS.apiStatus.NOT_FOUND,
+        error: { message: ERROR.common.NOT_FOUND },
+      },
+    );
   });
 
   app.use(Sentry.Handlers.errorHandler());

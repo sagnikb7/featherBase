@@ -1,0 +1,281 @@
+{"colors": [
+        {
+            "name": "red",
+            "hexCode": "#FF0000"
+        },
+        {
+            "name": "green",
+            "hexCode": "#00FF00"
+        },
+        {
+            "name": "blue",
+            "hexCode": "#0000FF"
+        },
+        {
+            "name": "yellow",
+            "hexCode": "#FFFF00"
+        },
+        {
+            "name": "purple",
+            "hexCode": "#800080"
+        },
+        {
+            "name": "orange",
+            "hexCode": "#FFA500"
+        },
+        {
+            "name": "black",
+            "hexCode": "#000000"
+        },
+        {
+            "name": "white",
+            "hexCode": "#FFFFFF"
+        },
+        {
+            "name": "gray",
+            "hexCode": "#808080"
+        },
+        {
+            "name": "teal",
+            "hexCode": "#008080"
+        },
+        {
+            "name": "turquoise",
+            "hexCode": "#40E0D0"
+        },
+        {
+            "name": "sky blue",
+            "hexCode": "#87CEEB"
+        },
+        {
+            "name": "navy blue",
+            "hexCode": "#000080"
+        },
+        {
+            "name": "lime",
+            "hexCode": "#00FF00"
+        },
+        {
+            "name": "olive",
+            "hexCode": "#808000"
+        },
+        {
+            "name": "maroon",
+            "hexCode": "#800000"
+        },
+        {
+            "name": "brown",
+            "hexCode": "#A52A2A"
+        },
+        {
+            "name": "beige",
+            "hexCode": "#F5F5DC"
+        },
+        {
+            "name": "tan",
+            "hexCode": "#D2B48C"
+        },
+        {
+            "name": "cyan",
+            "hexCode": "#00FFFF"
+        },
+        {
+            "name": "magenta",
+            "hexCode": "#FF00FF"
+        },
+        {
+            "name": "pink",
+            "hexCode": "#FFC0CB"
+        },
+        {
+            "name": "violet",
+            "hexCode": "#EE82EE"
+        },
+        {
+            "name": "indigo",
+            "hexCode": "#4B0082"
+        },
+        {
+            "name": "gold",
+            "hexCode": "#FFD700"
+        },
+        {
+            "name": "silver",
+            "hexCode": "#C0C0C0"
+        },
+        {
+            "name": "bronze",
+            "hexCode": "#CD7F32"
+        },
+        {
+            "name": "emerald",
+            "hexCode": "#50C878"
+        },
+        {
+            "name": "jade",
+            "hexCode": "#00A86B"
+        },
+        {
+            "name": "lavender",
+            "hexCode": "#E6E6FA"
+        },
+        {
+            "name": "peach",
+            "hexCode": "#FFE5B4"
+        },
+        {
+            "name": "apricot",
+            "hexCode": "#FBCEB1"
+        },
+        {
+            "name": "ochre",
+            "hexCode": "#CC7722"
+        },
+        {
+            "name": "amber",
+            "hexCode": "#FFBF00"
+        },
+        {
+            "name": "cream",
+            "hexCode": "#FFFDD0"
+        },
+        {
+            "name": "charcoal",
+            "hexCode": "#36454F"
+        },
+        {
+            "name": "ruby",
+            "hexCode": "#E0115F"
+        },
+        {
+            "name": "sapphire",
+            "hexCode": "#0F52BA"
+        },
+        {
+            "name": "aquamarine",
+            "hexCode": "#7FFFD4"
+        },
+        {
+            "name": "coral",
+            "hexCode": "#FF7F50"
+        },
+        {
+            "name": "salmon",
+            "hexCode": "#FA8072"
+        },
+        {
+            "name": "fuchsia",
+            "hexCode": "#FF00FF"
+        },
+        {
+            "name": "crimson",
+            "hexCode": "#DC143C"
+        },
+        {
+            "name": "ivory",
+            "hexCode": "#FFFFF0"
+        },
+        {
+            "name": "champagne",
+            "hexCode": "#F7E7CE"
+        },
+        {
+            "name": "taupe",
+            "hexCode": "#483C32"
+        },
+        {
+            "name": "mint",
+            "hexCode": "#3EB489"
+        },
+        {
+            "name": "olive drab",
+            "hexCode": "#6B8E23"
+        },
+        {
+            "name": "sienna",
+            "hexCode": "#A0522D"
+        },
+        {
+            "name": "cerulean",
+            "hexCode": "#007BA7"
+        },
+        {
+            "name": "periwinkle",
+            "hexCode": "#CCCCFF"
+        },
+        {
+            "name": "burgundy",
+            "hexCode": "#800020"
+        },
+        {
+            "name": "lime green",
+            "hexCode": "#32CD32"
+        },
+        {
+            "name": "forest green",
+            "hexCode": "#228B22"
+        },
+        {
+            "name": "sea green",
+            "hexCode": "#2E8B57"
+        },
+        {
+            "name": "khaki",
+            "hexCode": "#F0E68C"
+        },
+        {
+            "name": "moss green",
+            "hexCode": "#8A9A5B"
+        },
+        {
+            "name": "citrus",
+            "hexCode": "#9FB70A"
+        }, 
+
+        {
+            "name": "rust",
+            "hexCode": "#B7410E"
+        },
+        {
+            "name": "mustard",
+            "hexCode": "#FFDB58"
+        },
+        {
+            "name": "sand",
+            "hexCode": "#C2B280"
+        },
+        {
+            "name": "sunset orange",
+            "hexCode": "#FD5E53"
+        },
+        {
+            "name": "brick red",
+            "hexCode": "#CB4154"
+        },
+        },
+        {
+            "name": "pastel blue",
+            "hexCode": "#AEC6CF"
+        },
+        {
+            "name": "pastel green",
+            "hexCode": "#77DD77"
+        },
+        {
+            "name": "pastel pink",
+            "hexCode": "#FFD1DC"
+        },
+        {
+            "name": "pastel yellow",
+            "hexCode": "#FDFD96"
+        },
+        {
+            "name": "neon green",
+            "hexCode": "#39FF14"
+        },
+        {
+            "name": "neon pink",
+            "hexCode": "#FF6EC7"
+        }
+    ]
+}

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+import BaseRepository from './baseRepository.js';
 
-const NAME = 'base';
+const NAME = 'birds';
 
 const schema = new mongoose.Schema(
   {
@@ -16,11 +17,14 @@ const schema = new mongoose.Schema(
     distributionRangeSize: { type: String, required: true },
     bestSeenAt: { type: String },
     migrationStatus: { type: String, required: true },
-    familyOfBird: { type: String },
+    order: { type: String },
+    family: { type: String },
+    commonGroup: { type: String },
     rarity: { type: Number, min: 1, max: 5 },
     identification: { type: String },
-    colors: { type: [String] },
+    colors: { type: String },
     size: { type: String, enum: ['small', 'medium', 'large', 'tiny'] },
+    sizeRange: { type: String },
     diet: { type: [String] },
   },
   {
@@ -31,7 +35,12 @@ const schema = new mongoose.Schema(
   },
 );
 
-const birdBasicModel = mongoose.model(NAME, schema);
+class BirdModel extends BaseRepository {
+  constructor() {
+    super(mongoose.model(NAME, schema));
+  }
+}
 
-// eslint-disable-next-line import/prefer-default-export
-export { birdBasicModel };
+const birdBasicModel = new BirdModel();
+
+export default birdBasicModel;

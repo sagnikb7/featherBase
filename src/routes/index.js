@@ -1,9 +1,10 @@
 import birdRoutes from './birdRouter.js';
 import lgr from '#logger';
 
-import insertBirds from '../scripts/insert-birds.js';
+// import insertBirds from '../scripts/insert-birds.js';
 
-insertBirds();
+// insertBirds();
+
 const logger = lgr('application route');
 
 const routerBuilder = (app) => {
