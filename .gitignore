@@ -81,3 +81,4 @@ test/
 .yarn-integrity
 
 # Any other files or directories you want to ignore
+run.development.sh
