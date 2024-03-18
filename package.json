@@ -1,7 +1,7 @@
 {
-  "name": "birds",
+  "name": "feather-base",
   "version": "0.1.0",
-  "description": "birds db",
+  "description": "birds db with other features",
   "type": "module",
   "imports": {
     "#src/*": "./src/*",
@@ -24,7 +24,7 @@
     "lint:fix": "eslint 'index.js' 'src/**/*.js?(x)' --fix",
     "prepare": "husky"
   },
-  "keywords": [],
+  "keywords": ["birds","database"],
   "author": "Sagnik B",
   "license": "ISC",
   "dependencies": {

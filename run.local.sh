@@ -1,7 +1,7 @@
 export NODE_ENV=local
 export PORT=8888
 export DEBUG=true
-export SERVICE_NAME=bird
+export SERVICE_NAME=feather-base
 export MONGO_DB='mongodb://127.0.0.1:27017/featherBase'
 export AES_KEY=''
 export AES_IV=''
