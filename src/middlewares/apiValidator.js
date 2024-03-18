@@ -8,6 +8,9 @@ const validateReq = (schema, type = 'body') => async (req, res, next) => {
     case 'query':
       param = req.query;
       break;
+    case 'params':
+      param = req.params;
+      break;
     default:
       throw new Error('Type not supported in [validateReq]');
   }
