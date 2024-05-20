@@ -7,8 +7,8 @@ import path from 'path';
 import { readFile } from 'fs/promises';
 import birdBasicModel from '#models/birdBasicModel.js';
 
-const START_FILE = 1;
-const END_FILE = 10;
+const START_FILE = 11;
+const END_FILE = 15;
 const BATCH_SIZE = 10;
 
 const BirdSchema = birdBasicModel;

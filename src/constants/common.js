@@ -17,9 +17,9 @@ const CONSTANTS = {
   NANO_ID_CUSTOM_ALPHA_LOWER: '0123456789abcdefghijklmnopqrstuvwxyz',
 
   apiStatus: {
-    SUCCESS: 'true',
-    ERROR: 'false',
-    NOT_FOUND: 'false',
+    SUCCESS: true,
+    ERROR: false,
+    NOT_FOUND: false,
   },
 
   table: {
