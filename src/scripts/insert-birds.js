@@ -52,12 +52,12 @@ const insertBirds = async () => {
           commonGroup: fc.common_grouping.toLowerCase(),
           rarity: Number.parseInt(fc.Rarity, 10),
           identification: fc.How_to_identify,
-          colors: makeArray(fc.Primary_colors_of_the_bird),
+          colors: fc.Primary_colors_of_the_bird,
           size: fc.Size_of_the_bird.split(',')[0].trim().toLowerCase(),
           sizeRange: fc.Size_of_the_bird.split(',')[1].trim().toLowerCase(),
           diet: makeArray(fc.Diet),
         };
-        console.log(`inserting ${fc.Name} -->`, JSON.stringify(bird, null, 4));
+        console.log(`inserting --> ${fc.Name}`);
         const oldRecord = await BirdSchema.getOne({ scientificName: fc.Scientific_Name });
         if (oldRecord) {
           console.log('record already present');
