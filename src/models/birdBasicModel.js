@@ -8,6 +8,7 @@ const schema = new mongoose.Schema(
     name: { type: String, required: true },
     scientificName: { type: String, required: true },
     serialNumber: { type: Number, min: 1 },
+    hash: { type: String, required: true },
     iucnStatus: {
       type: String,
       enum: ['LC', 'NT', 'VU', 'EN', 'CR', 'EW', 'EX'],
@@ -22,7 +23,7 @@ const schema = new mongoose.Schema(
     commonGroup: { type: String },
     rarity: { type: Number, min: 1, max: 5 },
     identification: { type: String },
-    colors: { type: String },
+    colors: { type: [String] },
     size: { type: String, enum: ['small', 'medium', 'large', 'tiny'] },
     sizeRange: { type: String },
     diet: { type: [String] },

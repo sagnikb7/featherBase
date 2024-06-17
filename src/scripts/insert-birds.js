@@ -7,7 +7,9 @@ import path from 'path';
 import { readFile } from 'fs/promises';
 import birdBasicModel from '#models/birdBasicModel.js';
 
-const START_FILE = 16;
+import { generateMD5Hash } from '#utils/common.js';
+
+const START_FILE = 1;
 const END_FILE = 20;
 const BATCH_SIZE = 10;
 
@@ -16,8 +18,7 @@ const BirdSchema = birdBasicModel;
 const makeArray = (rawText) => {
   const a = rawText.split(',')
     .map((c) => c.replace(' and ', '').trim().toLowerCase())
-    .filter((c1) => c1)
-    .sort();
+    .filter((c1) => c1);
   return a;
 };
 
@@ -40,6 +41,7 @@ const insertBirds = async () => {
           name: fc.Name,
           serialNumber: ((batchNumber - 1) * BATCH_SIZE) + counter,
           scientificName: fc.Scientific_Name,
+          hash: generateMD5Hash(fc.Scientific_Name),
           iucnStatus: fc.IUCN_status,
           habitat: makeArray(fc.Habitat),
           distributionRangeSize: fc.Distribution_Range_Size.toLowerCase(),
@@ -49,8 +51,8 @@ const insertBirds = async () => {
           order: fc.Order,
           commonGroup: fc.common_grouping.toLowerCase(),
           rarity: Number.parseInt(fc.Rarity, 10),
-          identification: fc['How to identify'],
-          colors: fc.Primary_colors_of_the_bird,
+          identification: fc.How_to_identify,
+          colors: makeArray(fc.Primary_colors_of_the_bird),
           size: fc.Size_of_the_bird.split(',')[0].trim().toLowerCase(),
           sizeRange: fc.Size_of_the_bird.split(',')[1].trim().toLowerCase(),
           diet: makeArray(fc.Diet),

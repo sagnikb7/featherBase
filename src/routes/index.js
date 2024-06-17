@@ -1,6 +1,7 @@
 import birdRoutes from './birdRouter.js';
 import lgr from '#logger';
 
+// TODO this is used for bulk inserting, please check variables in script first 
 // import insertBirds from '../scripts/insert-birds.js';
 
 // insertBirds();
