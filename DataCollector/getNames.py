@@ -33,4 +33,4 @@ def getBatch2():
             batch+=1  
 
 
-# getBatch2()
+getBatch2()
