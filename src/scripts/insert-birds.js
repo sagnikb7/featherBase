@@ -9,8 +9,8 @@ import birdBasicModel from '#models/birdBasicModel.js';
 
 import { generateMD5Hash } from '#utils/common.js';
 
-const START_FILE = 1;
-const END_FILE = 20;
+const START_FILE = 21;
+const END_FILE = 37;
 const BATCH_SIZE = 10;
 
 const BirdSchema = birdBasicModel;
