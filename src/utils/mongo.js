@@ -7,7 +7,9 @@ const logger = lgr('mongo init');
 const connectToDatabase = () => {
   const mongoURI = config.get('database').mongo;
 
-  mongoose.connect(mongoURI);
+  mongoose.connect(mongoURI, {
+    serverSelectionTimeoutMS: 30 * 1000, // Increase to 30 seconds or more
+  });
 
   const db = mongoose.connection;
 

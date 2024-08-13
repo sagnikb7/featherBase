@@ -82,3 +82,4 @@ test/
 
 # Any other files or directories you want to ignore
 run.development.sh
+public/images/birds

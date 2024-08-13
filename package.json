@@ -1,6 +1,6 @@
 {
   "name": "feather-base",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "birds db with other features",
   "type": "module",
   "imports": {
@@ -22,7 +22,8 @@
     "start:local": "nodemon index.js",
     "start:debug": "./run.local.sh",
     "lint:fix": "eslint 'index.js' 'src/**/*.js?(x)' --fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:FE":"cd web && npx pnpm@latest i && npx pnpm@latest build"
   },
   "keywords": ["birds","database"],
   "author": "Sagnik B",

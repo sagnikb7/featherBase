@@ -18,7 +18,7 @@ if (mode === 'server') {
 
   const httpServer = createServer(app);
   httpServer.listen(PORT, () => {
-    logger.info(`api server started at PORT:${PORT}`);
+    logger.info(`API server [STARTED] at PORT:${PORT}`);
   });
 }
 // if (mode === 'websocket') {

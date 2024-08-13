@@ -13,7 +13,7 @@ const basicMiddleware = (app) => {
   app.use(Sentry.Handlers.tracingHandler());
   logger.info('adding basic middlewares');
   // basic safety
-  app.use(timeout('10s'));
+  app.use(timeout('30s'));
   app.use(helmet());
 
   // body-parsers

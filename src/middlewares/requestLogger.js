@@ -17,7 +17,7 @@ const loggingMiddleware = (req, res, next) => {
   if (URLS_TO_IGNORE.includes(req.url)) return next();
   req.id = nanoid();
   const reqLog = {
-    REQUEST_ID: req.id, TYPE: 'request', METHOD: req.method, URL: req.originalUrl, IP: req.ip,
+    REQ_ID: req.id, TYPE: 'req', METHOD: req.method, URL: req.originalUrl, IP: req.ip,
   };
   if (ENABLE_REQ_HEADER_LOGGING) reqLog.HEADERS = req.headers;
 
@@ -34,7 +34,7 @@ const loggingMiddleware = (req, res, next) => {
 
   // Log response status and headers DISABLE
   res.on('finish', () => {
-    const resLog = { REQUEST_ID: req.id, TYPE: 'response', STATUS: res.statusCode };
+    const resLog = { REQ_ID: req.id, TYPE: 'res', STATUS: res.statusCode };
     if (ENABLE_RES_HEADER_LOGGING) resLog.RES_HEADERS = res.getHeaders();
     logger.info(resLog);
   });

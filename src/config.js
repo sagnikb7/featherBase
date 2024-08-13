@@ -36,6 +36,13 @@ const config = convict({
     env: 'SERVICE_NAME',
     arg: 'service_name',
   },
+  imageDeliveryMode: {
+    doc: 'image delivery mode',
+    format: String,
+    default: 'online',
+    env: 'VITE_IMG_DELIVERY_MODE',
+    arg: 'img_delivery_mode',
+  },
   sentry: {
     dsn: {
       doc: 'sentry DSN',
