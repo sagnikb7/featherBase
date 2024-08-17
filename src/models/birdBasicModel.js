@@ -24,7 +24,7 @@ const schema = new mongoose.Schema(
     rarity: { type: Number, min: 1, max: 5 },
     identification: { type: String },
     colors: { type: String },
-    size: { type: String, enum: ['small', 'medium', 'large', 'tiny'] },
+    size: { type: String, enum: ['tiny', 'small', 'medium', 'large', 'very large'] },
     sizeRange: { type: String },
     diet: { type: [String] },
   },
