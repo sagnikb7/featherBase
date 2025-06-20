@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T extends any, O extends any">
 import type { Bird, SingleBirdResponse } from '~/types/common'
-import { baseUrl } from '~/composables'
+import { baseUrl, useIucnStatus } from '~/composables'
 
 const route = useRoute()
 const birdId = Number.parseInt(route.params.id)
@@ -10,7 +10,9 @@ const ONLINE_MODE = import.meta.env.VITE_IMG_DELIVERY_MODE === 'online'
 const currentBird = ref<Bird | undefined>()
 const birdBg = ref<HTMLElement | undefined>()
 
-async function getRandomBird() {
+const { iucnStatusClasses, iucnStatusExplanation } = useIucnStatus(currentBird)
+
+async function getBirdData() {
   try {
     const newBird = (await (
       await fetch(`${baseUrl}/v1.0/birds/${birdId}`)
@@ -20,15 +22,14 @@ async function getRandomBird() {
       const birdImageUrl = ONLINE_MODE
         ? newBird.data.meta.images[0]?.url
         : `/images/birds/${newBird.data.meta.images[0]?.file}`
-      birdBg.value!.style.backgroundImage = `url('${birdImageUrl}')`
+      birdBg.value!.style.backgroundImage = `url('${birdImageUrl ?? '/no_image.png'}')`
     }
-  }
-  catch (e) {
+  } catch (e) {
     console.error(e)
   }
 }
 
-getRandomBird()
+getBirdData()
 </script>
 
 <template>
@@ -45,73 +46,57 @@ getRandomBird()
         class="mt-[265px] rounded-tl-3xl bg-gray-100 p-4 pb-6 text-start dark:bg-neutral-900"
       >
         <div class="flex items-baseline justify-between">
-          <p class="text-2xl font-bold">
+          <p class="text-2xl font-stretch-semi-expanded">
             {{ currentBird.name }}
           </p>
           <span
-            title="IUCN Status: It is an inventory of the global conservation status and extinction risk of biological species."
-            class="cursor-help rounded bg-gray-300 px-2 py-0.5 font-bold font-mono dark-bg-slate-700"
+            :title="iucnStatusExplanation"
+            :class="`cursor-help rounded px-2 py-0.5 font-bold font-mono ${iucnStatusClasses}`"
           >
             {{ currentBird.iucnStatus }}
           </span>
         </div>
-        <p class="text-xl font-light font-italic">
+        <p class="text-xl font-light font-italic font-serif">
           {{ currentBird.scientificName }}
         </p>
-        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Colors
-        </p>
+        <p class="detail-header">Colors</p>
         <p class="text-sm">
           {{ currentBird.colors }}
         </p>
 
-        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Identification
-        </p>
+        <p class="detail-header">Identification</p>
         <p class="text-sm">
           {{ currentBird.identification }}
         </p>
 
-        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Habitat
-        </p>
+        <p class="detail-header">Habitat</p>
         <p class="text-sm capitalize">
-          {{ currentBird.habitat.join(", ") }}
+          {{ currentBird.habitat.join(', ') }}
         </p>
 
-        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Best seen at
-        </p>
+        <p class="detail-header">Best seen at</p>
         <p class="text-sm capitalize">
           {{ currentBird.bestSeenAt }}
         </p>
 
         <div class="mt-3 h-1px w-full border-t" />
 
-        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Migration Status
-        </p>
+        <p class="detail-header">Migration Status</p>
         <p class="text-sm capitalize">
           {{ currentBird.migrationStatus }}
         </p>
 
-        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Order
-        </p>
+        <p class="detail-header">Order</p>
         <p class="text-sm capitalize">
           {{ currentBird.order }}
         </p>
 
-        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Family
-        </p>
+        <p class="detail-header">Family</p>
         <p class="text-sm capitalize">
           {{ currentBird.family }}
         </p>
 
-        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Common Group
-        </p>
+        <p class="detail-header">Common Group</p>
         <p class="text-sm capitalize">
           {{ currentBird.commonGroup }}
         </p>
@@ -120,7 +105,7 @@ getRandomBird()
   </div>
 </template>
 
-<style lang="css">
+<style>
 .bird-view {
   height: calc(100vh - 68px);
 }
@@ -129,5 +114,13 @@ getRandomBird()
   background-repeat: no-repeat;
   background-size: contain;
   background-position: top;
+}
+
+.detail-header {
+  margin-top: 0.5rem;
+  font-size: 1.1rem;
+  line-height: 1.5rem;
+  color: var(--accent-color);
+  font-stretch: expanded;
 }
 </style>

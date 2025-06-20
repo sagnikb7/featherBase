@@ -1,3 +1,45 @@
+@font-face {
+  font-family: 'Neuzeit Grotesk';
+  src: url('NeuzeitGro-Reg.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Neuzeit Grotesk';
+  src: url('NeuzeitGro-Lig.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Neuzeit Grotesk';
+  src: url('NeuzeitGro-Bol.eot');
+  src: url('NeuzeitGro-Bol.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+}
+
+:root {
+  --bg-color: #f9f9f9;
+  --text-color: #333;
+  --input-bg-color: #f7f7f7;
+  --border-color: #b3d9ff;
+  --accent-color: #007acc;
+  --accent-hover: #0066b3;
+  --accent-light: #e6f3ff;
+}
+
+.dark {
+  --bg-color: #1a1a1a;
+  --text-color: #d1d5db;
+  --input-bg-color: #2d2d2d;
+  --border-color: #4a6663;
+  --accent-color: #afe0db;
+  --accent-hover: #9dd5cf;
+  --accent-light: rgba(175, 224, 219, 0.15);
+}
+
 html,
 body,
 #app {
