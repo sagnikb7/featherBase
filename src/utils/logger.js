@@ -15,7 +15,7 @@ const jsonFormat = combine(
   printf(({
     timestamp, level, message, file, meta,
   }) => JSON.stringify({
-    time: timestamp, level, message, meta, file,
+    time: timestamp, level, msg: message, meta, file,
   })),
 );
 

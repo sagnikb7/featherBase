@@ -81,6 +81,6 @@ test/
 .yarn-integrity
 
 # Any other files or directories you want to ignore
-run.development.sh
+run.dev.sh
 public/images/birds
 .DS_Store
