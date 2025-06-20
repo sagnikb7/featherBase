@@ -4,7 +4,7 @@
   "packageManager": "pnpm@9.6.0",
   "scripts": {
     "build": "vite build",
-    "dev": "vite --port 3333 --host",
+    "dev": "vite --port 8000 --host",
     "lint": "eslint .",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@iconify-json/ph": "^1.1.14",
     "@vueuse/core": "^10.11.0",
+    "fuse.js": "^7.1.0",
     "vue": "^3.4.35",
     "vue-router": "^4.4.2"
   },

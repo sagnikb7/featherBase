@@ -37,7 +37,7 @@ Format of the JSON objects:
 
 Please provide accurate information only in JSON format and no other text, as i need this for scientific purpose 
 
-Provide it for the following bird species :  
+Provide it for the following bird species : 
 Grey-headed fish eagle
 White-eyed buzzard
 Rufous-winged buzzard
@@ -50,7 +50,7 @@ Common buzzard
 Eastern barn owl
 
 
-lets say one example of the data will look like :      {
+lets say one example of the data will look like :     {
         "Name": "Red-breasted Merganser",
         "Scientific_Name": "Mergus serrator",
         "IUCN_status": "LC",
