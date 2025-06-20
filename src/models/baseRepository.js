@@ -4,8 +4,12 @@ class BaseRepository {
     this.model = model;
   }
 
-  async get(query) {
-    const data = await this.model.find(query).lean();
+  async get(query, sort = null, projection = null) {
+    let dbQuery = this.model.find(query, projection);
+    if (sort) {
+      dbQuery = dbQuery.sort(sort);
+    }
+    const data = await dbQuery.lean();
     return data;
   }
 

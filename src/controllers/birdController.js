@@ -1,6 +1,6 @@
-import { getBirdById } from '#services/birdService.js';
+import { getBirdById, getAllBirds } from '#services/birdService.js';
 
-const getBirds = async (req, res, next) => {
+const getBirdsController = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await getBirdById(id);
@@ -13,5 +13,17 @@ const getBirds = async (req, res, next) => {
   }
 };
 
+const getAllBirdsController = async (req, res, next) => {
+  try {
+    const result = await getAllBirds();
+    res.json({
+      success: !!result,
+      data: result || {},
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // eslint-disable-next-line import/prefer-default-export
-export { getBirds };
+export { getBirdsController, getAllBirdsController };
