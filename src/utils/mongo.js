@@ -13,11 +13,10 @@ const connectToDatabase = () => {
 
   const db = mongoose.connection;
 
-  // eslint-disable-next-line no-console
+   
   db.on('error', console.error.bind(console, 'mongoDB connection error:'));
   db.once('open', () => logger.info('mongoDB connected'));
   return db;
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export { connectToDatabase };

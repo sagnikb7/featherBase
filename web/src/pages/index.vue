@@ -1,47 +1,80 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Fuse from 'fuse.js'
 import { baseUrl } from '~/composables'
 import BirdCard from '~/components/BirdCard.vue'
 
+const ONLINE_MODE = import.meta.env.VITE_IMG_DELIVERY_MODE === 'online'
+const PAGE_SIZE = 20
+
 const searchQuery = ref('')
+const selectedGroup = ref('')
+const groups = ref([])
 const birds = ref([])
 const loading = ref(true)
+const loadingMore = ref(false)
 const error = ref(null)
+const hasNext = ref(false)
+const currentPage = ref(1)
 
-// Fuse.js configuration
 const fuseOptions = {
   keys: [
     { name: 'name', weight: 0.7 },
     { name: 'scientificName', weight: 0.3 },
   ],
-  threshold: 0.4, // Lower threshold means more strict matching
+  threshold: 0.4,
   includeScore: true,
   ignoreDiacritics: true,
   minMatchCharLength: 2,
 }
 
-// Create Fuse instance (will be updated when data loads)
 let fuse = null
 
-const filteredBirds = computed(() => {
-  if (!searchQuery.value || searchQuery.value.length < 2 || !fuse) {
-    return birds.value
-  }
+const isSearching = computed(() => searchQuery.value && searchQuery.value.length >= 2)
 
-  const results = fuse.search(searchQuery.value)
-  return results.map(result => result.item)
+const displayBirds = computed(() => {
+  if (!isSearching.value || !fuse)
+    return birds.value
+
+  return fuse.search(searchQuery.value).map(result => result.item)
 })
 
-async function fetchBirds() {
+async function fetchGroups() {
   try {
-    loading.value = true
-    const response = await fetch(`${baseUrl}/v1.0/birds`)
+    const response = await fetch(`${baseUrl}/v1.0/birds/groups`)
+    const result = await response.json()
+    if (result.success)
+      groups.value = result.data
+  }
+  catch (err) {
+    console.error('Error fetching groups:', err)
+  }
+}
+
+async function fetchBirds(page = 1) {
+  const isFirstPage = page === 1
+  try {
+    if (isFirstPage) loading.value = true
+    else loadingMore.value = true
+
+    const params = new URLSearchParams({ page, size: PAGE_SIZE })
+    if (selectedGroup.value)
+      params.set('group', selectedGroup.value)
+
+    const response = await fetch(`${baseUrl}/v1.0/birds?${params}`)
     const result = await response.json()
 
     if (result.success) {
-      birds.value = result.data
-      // Create new Fuse instance with the fetched data
+      if (isFirstPage) {
+        birds.value = result.data
+      }
+      else {
+        birds.value = [...birds.value, ...result.data]
+      }
+      hasNext.value = result.pagination.hasNext
+      currentPage.value = result.pagination.page
+
+      // Rebuild fuse index with all loaded birds
       fuse = new Fuse(birds.value, fuseOptions)
     }
     else {
@@ -54,172 +87,97 @@ async function fetchBirds() {
   }
   finally {
     loading.value = false
+    loadingMore.value = false
   }
 }
 
+function loadMore() {
+  if (loadingMore.value || !hasNext.value)
+    return
+  fetchBirds(currentPage.value + 1)
+}
+
+function onGroupChange() {
+  birds.value = []
+  searchQuery.value = ''
+  fetchBirds(1)
+}
+
+// Intersection observer for infinite scroll
+const sentinel = ref(null)
+
+onMounted(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && !isSearching.value) {
+        loadMore()
+      }
+    },
+    { rootMargin: '200px' },
+  )
+
+  watch(sentinel, (el) => {
+    if (el) observer.observe(el)
+  }, { immediate: true })
+
+  onUnmounted(() => observer.disconnect())
+})
+
+fetchGroups()
 fetchBirds()
 </script>
 
 <template>
   <div class="search-container">
-    <input
-      v-model="searchQuery"
-      type="text"
-      placeholder="Search for birds..."
-      :disabled="loading"
-    >
-    <div v-if="loading" class="loading">
+    <div class="search-row">
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search birds by name..."
+        :disabled="loading"
+      >
+      <select
+        v-model="selectedGroup"
+        :disabled="loading"
+        @change="onGroupChange"
+      >
+        <option value="">
+          All Groups
+        </option>
+        <option v-for="g in groups" :key="g" :value="g">
+          {{ g }}
+        </option>
+      </select>
+    </div>
+    <div v-if="loading" class="status-box loading">
       Loading birds...
     </div>
-    <div v-if="error" class="error">
-      Error: {{ error }}
+    <div v-if="error" class="status-box error">
+      {{ error }}
     </div>
     <div
-      v-if="!loading && searchQuery && filteredBirds.length === 0"
-      class="no-results"
+      v-if="!loading && isSearching && displayBirds.length === 0"
+      class="status-box no-results"
     >
       No birds found matching "{{ searchQuery }}"
     </div>
-    <div v-if="!loading && searchQuery" class="search-info">
-      Found {{ filteredBirds.length }} bird{{
-        filteredBirds.length !== 1 ? 's' : ''
-      }}
+    <div v-if="!loading && isSearching" class="search-info">
+      {{ displayBirds.length }} result{{ displayBirds.length !== 1 ? 's' : '' }}
     </div>
   </div>
+
   <div v-if="!loading" class="card-container">
     <BirdCard
-      v-for="bird in filteredBirds"
+      v-for="bird in displayBirds"
       :key="bird.id"
       :bird="bird"
     />
   </div>
+
+  <!-- Infinite scroll sentinel + loader -->
+  <div v-if="!loading && !isSearching && hasNext" ref="sentinel" class="scroll-loader">
+    <div v-if="loadingMore" class="scroll-loader-dots">
+      <span /><span /><span />
+    </div>
+  </div>
 </template>
-
-<style>
-.search-container {
-  margin: 20px;
-  text-align: center;
-}
-
-input[type='text'] {
-  width: 100%;
-  max-width: 600px;
-  padding: 12px 16px;
-  font-size: 16px;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--input-bg-color);
-  color: var(--text-color);
-  transition:
-    background-color 0.3s,
-    color 0.3s,
-    border-color 0.3s;
-  outline: none;
-}
-
-input[type='text']:focus {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px var(--accent-light);
-}
-
-input[type='text']:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.loading {
-  margin-top: 16px;
-  padding: 12px;
-  background-color: var(--accent-light);
-  border: 1px solid var(--accent-color);
-  border-radius: 6px;
-  color: #004d80;
-  font-size: 14px;
-}
-
-.error {
-  margin-top: 16px;
-  padding: 12px;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  color: #dc2626;
-  font-size: 14px;
-}
-
-.no-results {
-  margin-top: 16px;
-  padding: 12px;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  color: #dc2626;
-  font-size: 14px;
-}
-
-.search-info {
-  margin-top: 12px;
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
-}
-
-.card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
-  gap: 20px;
-  padding: 0 20px;
-}
-
-.dark .search-container input[type='text'] {
-  background-color: var(--input-bg-color);
-  color: var(--text-color);
-  border-color: var(--border-color);
-}
-
-.dark .search-container input[type='text']:focus {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px var(--accent-light);
-}
-
-.dark .search-info {
-  color: #ccc;
-}
-
-.dark .no-results {
-  background-color: #2d1b1b;
-  border-color: #dc2626;
-  color: #ff6b6b;
-}
-
-.dark .loading {
-  background-color: rgba(175, 224, 219, 0.1);
-  border-color: var(--accent-color);
-  color: var(--accent-color);
-}
-
-.dark .error {
-  background-color: #2d1b1b;
-  border-color: #dc2626;
-  color: #ff6b6b;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .card-container {
-    gap: 16px;
-    padding: 0 16px;
-  }
-
-  .search-container {
-    margin: 16px;
-  }
-
-  input[type='text'] {
-    padding: 14px 16px;
-    font-size: 16px;
-  }
-  }
-</style>

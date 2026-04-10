@@ -1,0 +1,22 @@
+/* ──────────────────────────────────────────
+   Status indicators: loading, error, empty
+   Tonal shifts instead of borders.
+   ────────────────────────────────────────── */
+
+.status-box {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+}
+
+.loading {
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
+.error,
+.no-results {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-text);
+}

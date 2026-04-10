@@ -1,0 +1,119 @@
+/* ──────────────────────────────────────────
+   Design Tokens — Deep Forest & Earth
+   "The Digital Curator" design system
+   Change these to retheme the entire app.
+   ────────────────────────────────────────── */
+
+:root {
+  /* ── Surfaces (tonal nesting hierarchy) ── */
+  --color-bg: #fcf9f5;                            /* surface — primary reading */
+  --color-bg-raised: #ffffff;                      /* surface-container-lowest — cards */
+  --color-bg-input: #f6f3ef;                       /* surface-container-low — secondary */
+  --color-bg-muted: #e5e2de;                       /* surface-container-highest — interactive */
+
+  /* ── Text ── */
+  --color-text: #1c1c19;                           /* on-background — never 100% black */
+  --color-text-muted: #44544e;                     /* on-surface-variant */
+  --color-text-faint: #6d7a74;                     /* tertiary text */
+
+  /* ── Ghost border — outline-variant at 20% opacity ── */
+  --color-border: rgba(193, 200, 196, 0.2);
+  --color-divider: rgba(193, 200, 196, 0.12);
+
+  /* ── Primary (deep forest) ── */
+  --color-accent: #02241d;                         /* primary */
+  --color-accent-hover: #1a3a32;                   /* primary-container */
+  --color-accent-light: rgba(2, 36, 29, 0.08);    /* primary tint */
+
+  /* ── Secondary ── */
+  --color-secondary: #dee2c9;                      /* secondary-container */
+  --color-secondary-dim: #c8ccb0;                  /* secondary-fixed-dim (chips) */
+
+  /* ── Gradients ── */
+  --gradient-primary: linear-gradient(135deg, #02241d, #1a3a32);
+
+  /* ── Status ── */
+  --color-danger: #a63d2f;
+  --color-danger-light: rgba(166, 61, 47, 0.06);
+  --color-danger-text: #a63d2f;
+
+  --color-success: #4a7c3f;
+
+  /* ── Typography ── */
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Newsreader', ui-serif, Georgia, serif;
+  --font-display: 'Newsreader', ui-serif, Georgia, serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2rem;
+  --text-display: 2.75rem;
+
+  /* ── Spacing ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ── Radii ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 0.5rem;
+  --radius-full: 9999px;
+
+  /* ── Ambient Shadows ── */
+  --shadow-card: none;
+  --shadow-card-hover: 0 0 40px rgba(28, 28, 25, 0.06);
+  --shadow-focus: 0 0 0 3px var(--color-accent-light);
+
+  /* ── Glass ── */
+  --glass-bg: rgba(252, 249, 245, 0.7);
+  --glass-blur: 24px;
+
+  /* ── Transitions ── */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
+}
+
+/* ── Dark mode ── */
+.dark {
+  --color-bg: #0d1512;
+  --color-bg-raised: #141e1a;
+  --color-bg-input: #1a2824;
+  --color-bg-muted: #253530;
+
+  --color-text: #e1e3de;
+  --color-text-muted: #8a9b94;
+  --color-text-faint: #5e6f68;
+
+  --color-border: rgba(193, 200, 196, 0.1);
+  --color-divider: rgba(193, 200, 196, 0.06);
+
+  --color-accent: #86d4be;
+  --color-accent-hover: #a0e4d0;
+  --color-accent-light: rgba(134, 212, 190, 0.1);
+
+  --color-secondary: #3a3e2e;
+  --color-secondary-dim: #2e3224;
+
+  --gradient-primary: linear-gradient(135deg, #86d4be, #a0e4d0);
+
+  --color-danger: #e07060;
+  --color-danger-light: rgba(224, 112, 96, 0.08);
+  --color-danger-text: #e07060;
+
+  --glass-bg: rgba(13, 21, 18, 0.7);
+
+  --shadow-card: none;
+  --shadow-card-hover: 0 0 40px rgba(0, 0, 0, 0.15);
+}

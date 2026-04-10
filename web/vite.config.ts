@@ -16,6 +16,25 @@ export default defineConfig({
       '~/': `${path.resolve(__dirname, 'src')}/`,
     },
   },
+
+  server: {
+    port: 8000,
+    proxy: {
+      '/v1.0': {
+        target: 'http://localhost:8888',
+        changeOrigin: true,
+      },
+      '/_health': {
+        target: 'http://localhost:8888',
+        changeOrigin: true,
+      },
+      '/images': {
+        target: 'http://localhost:8888',
+        changeOrigin: true,
+      },
+    },
+  },
+
   plugins: [
     VueMacros({
       defineOptions: false,

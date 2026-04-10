@@ -22,7 +22,14 @@ const validateReq = (schema, type = 'body') => async (req, res, next) => {
       message: `Invalid req params: ${error.details.map((detail) => detail.message).join(', ')}`,
     });
   }
-  req.body = value;
+
+  // Express 5 makes req.query and req.params read-only getters,
+  // so store validated values on req.validated instead.
+  if (!req.validated) req.validated = {};
+  req.validated[type] = value;
+
+  if (type === 'body') req.body = value;
+
   return next();
 };
 

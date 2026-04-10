@@ -18,5 +18,8 @@ then
     export MODE="server";
 fi
 
-npm run build:FE
+# For production: build frontend first, then start server
+# npm run build:FE
+
+# For development: run `pnpm dev` instead — starts backend + Vite dev server with hot reload
 npx nodemon --trace-warnings index.js

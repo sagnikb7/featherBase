@@ -21,30 +21,41 @@
     "start": "node index.js",
     "start:local": "nodemon index.js",
     "start:debug": "./run.local.sh",
+    "dev": "concurrently \"./run.dev.sh\" \"cd web && pnpm dev\" --names backend,frontend --prefix-colors blue,magenta",
+    "dev:backend": "./run.dev.sh",
+    "dev:frontend": "cd web && pnpm dev",
     "lint:fix": "eslint 'index.js' 'src/**/*.js?(x)' --fix",
     "prepare": "husky",
-    "build:FE":"cd web && npx pnpm@latest i && npx pnpm@latest build"
+    "build:FE": "cd web && npx pnpm@latest i && npx pnpm@latest build"
   },
-  "keywords": ["birds","database"],
+  "keywords": [
+    "birds",
+    "database"
+  ],
   "author": "Sagnik B",
   "license": "ISC",
   "dependencies": {
-    "@sentry/node": "^7.100.1",
-    "@sentry/profiling-node": "^7.100.1",
-    "chalk": "^5.3.0",
+    "@sentry/node": "^9.30.0",
+    "@sentry/profiling-node": "^9.30.0",
+    "chalk": "^5.4.1",
     "connect-timeout": "^1.9.0",
     "convict": "^6.2.4",
-    "express": "^4.18.2",
-    "helmet": "^7.1.0",
-    "joi": "^17.12.1",
-    "mongoose": "^8.1.1",
-    "nanoid": "^5.0.5",
-    "winston": "^3.11.0"
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "joi": "^17.13.3",
+    "mongoose": "^8.16.0",
+    "nanoid": "^5.1.5",
+    "node-cache": "^5.1.2",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "eslint": "^8.56.0",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.29.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.29.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "husky": "^9.0.11",
-    "nodemon": "^3.0.3"
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "nodemon": "^3.1.10"
   }
 }

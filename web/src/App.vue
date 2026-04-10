@@ -1,5 +1,5 @@
 <template>
-  <main font-sans text="center gray-700 dark:gray-300" class="px-4">
+  <main font-sans style="color: var(--color-text); background-color: var(--color-bg); min-height: 100vh;">
     <TheHeader />
     <RouterView />
   </main>

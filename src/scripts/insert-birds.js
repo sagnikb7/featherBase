@@ -1,7 +1,7 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable consistent-return */
+ 
+ 
+ 
+ 
 /* eslint-disable no-console */
 import path from 'path';
 import { readFile } from 'fs/promises';
@@ -9,8 +9,8 @@ import birdBasicModel from '#models/birdBasicModel.js';
 
 import { generateMD5Hash } from '#utils/common.js';
 
-const START_FILE = 41;
-const END_FILE = 50;
+const START_FILE = 51;
+const END_FILE = 51;
 const BATCH_SIZE = 10;
 
 const BirdSchema = birdBasicModel;
@@ -31,7 +31,7 @@ const insertBirds = async () => {
       console.log(`\n\nReading ${f} \n`);
 
       const batchNumber = Number(f.split('.json')[0]);
-      const fileContents = await readFile((path.join(process.cwd(), `/birdJSON/${f}`)), 'utf8');
+      const fileContents = await readFile((path.join(process.cwd(), `/data/birds/${f}`)), 'utf8');
       let counter = 0;
 
       for (const fc of JSON.parse(fileContents)) {

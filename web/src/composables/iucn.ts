@@ -5,21 +5,21 @@ type IucnStatus = 'LC' | 'NT' | 'VU' | 'EN' | 'CR'
 export function useIucnStatus(bird: Ref<Bird | undefined>) {
   const iucnStatusClasses = computed(() => {
     if (!bird.value?.iucnStatus) {
-      return 'bg-gray-300 text-gray-800 dark:bg-slate-700 dark:text-gray-200'
+      return 'bg-stone-200 text-stone-700 dark:bg-stone-700 dark:text-stone-300'
     }
 
     const status = bird.value.iucnStatus as IucnStatus
     const classMap: Record<IucnStatus, string> = {
-      LC: 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200',
-      NT: 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200',
-      VU: 'bg-orange-200 text-orange-800 dark:bg-orange-800 dark:text-orange-200',
-      EN: 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200',
-      CR: 'bg-red-600 text-white dark:bg-red-900 dark:text-red-100',
+      LC: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+      NT: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+      VU: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+      EN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+      CR: 'bg-red-700 text-white dark:bg-red-900 dark:text-red-100',
     }
 
     return (
       classMap[status]
-      || 'bg-gray-300 text-gray-800 dark:bg-slate-700 dark:text-gray-200'
+      || 'bg-stone-200 text-stone-700 dark:bg-stone-700 dark:text-stone-300'
     )
   })
 

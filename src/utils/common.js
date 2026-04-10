@@ -5,5 +5,4 @@ const generateMD5Hash = (data) => {
   return hash;
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export { generateMD5Hash };

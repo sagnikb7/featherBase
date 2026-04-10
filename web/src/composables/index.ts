@@ -1,8 +1,7 @@
 export * from './dark'
 export * from './iucn'
 
-export const baseUrl = import.meta.env.MODE === 'development'
-  ? (import.meta.env.VITE_IMG_DELIVERY_MODE === 'online'
-      ? 'https://featherbase.onrender.com'
-      : 'http://localhost:8888')
-  : window.location.origin
+// In dev, Vite proxy forwards /v1.0/* to the backend.
+// In prod, Express serves everything from the same origin.
+// Either way, relative URLs work.
+export const baseUrl = ''

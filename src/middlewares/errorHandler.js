@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import fs from 'fs';
 // TODO
-import Sentry from '@sentry/node';
-import { ProfilingIntegration } from '@sentry/profiling-node';
+import * as Sentry from '@sentry/node';
+// import { ProfilingIntegration } from '@sentry/profiling-node';
 import { ERROR } from '#constants/error.js';
 import { CONSTANTS } from '#constants/common.js';
 
@@ -21,7 +21,7 @@ const sentryOptions = (app) => ({
   integrations: [
     new Sentry.Integrations.Http({ tracing: true }), // enable HTTP calls tracing
     new Sentry.Integrations.Express({ app }), // enable Express.js middleware tracing
-    new ProfilingIntegration(),
+    // new ProfilingIntegration(),
   ],
   tracesSampleRate: 0.75, // Performance Monitoring , Capture 100% of the transactions, reduce in production!
   profilesSampleRate: 0.75, // Set sampling rate for profiling - this is relative to tracesSampleRate
@@ -30,7 +30,7 @@ const sentryOptions = (app) => ({
 const errorMiddleware = (app, debug) => {
   logger.info('adding error middlewares');
 
-  Sentry.init(sentryOptions(app));
+  // Sentry.init(sentryOptions(app));
 
   // not found middleware
   app.use((req, res, next) => {
@@ -42,7 +42,7 @@ const errorMiddleware = (app, debug) => {
     );
   });
 
-  app.use(Sentry.Handlers.errorHandler());
+  // app.use(Sentry.Handlers.errorHandler());
 
   app.use((err, req, res, next) => {
     logger.error(`${err.message} \n${err.stack || ''}`);

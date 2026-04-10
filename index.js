@@ -1,7 +1,6 @@
 import { createServer } from 'http';
 import config from '#config';
 import lgr from '#logger';
-// eslint-disable-next-line import/extensions
 import { connectToDatabase } from '#utils/mongo.js';
 
 import app from '#src/app.js';

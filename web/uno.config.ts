@@ -10,11 +10,11 @@ export default defineConfig({
   shortcuts: [
     [
       'btn',
-      'px-4 py-1 rounded inline-block bg-teal-600 text-white cursor-pointer hover:bg-teal-700 disabled:cursor-default disabled:bg-gray-600 disabled:opacity-50',
+      'px-5 py-2 rounded-full inline-block text-white cursor-pointer disabled:cursor-default disabled:opacity-50',
     ],
     [
       'icon-btn',
-      'text-[0.9em] inline-block cursor-pointer select-none opacity-75 transition duration-200 ease-in-out hover:opacity-100 hover:text-teal-600 !outline-none',
+      'text-[0.9em] inline-block cursor-pointer select-none opacity-75 transition duration-200 ease-in-out hover:opacity-100 !outline-none',
     ],
   ],
   presets: [
@@ -26,8 +26,9 @@ export default defineConfig({
     }),
     presetWebFonts({
       fonts: {
-        sans: 'Neuzeit Grotesk',
-        serif: 'Noto Serif Display:300',
+        sans: 'Manrope:400,500,600,700',
+        serif: 'Newsreader:300,400,500,600',
+        display: 'Newsreader:400,500,600',
         mono: 'DM Mono',
       },
     }),

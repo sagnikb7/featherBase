@@ -18,7 +18,7 @@ const config = convict({
   port: {
     doc: 'port of the service',
     format: Number,
-    default: 8000,
+    default: 8888,
     env: 'PORT',
     arg: 'port',
   },
