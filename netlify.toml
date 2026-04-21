@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm build:FE"
+  command = "cp package.json netlify/functions/ && pnpm build:FE"
   publish = "web/dist"
   functions = "netlify/functions"
 
@@ -8,6 +8,7 @@
 
 [functions]
   node_bundler = "none"
+  included_files = ["src/**"]
 
 [[redirects]]
   from = "/v1.0/*"
