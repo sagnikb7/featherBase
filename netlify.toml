@@ -6,6 +6,9 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[functions]
+  included_files = ["package.json"]
+
 [[redirects]]
   from = "/v1.0/*"
   to = "/.netlify/functions/api/v1.0/:splat"
