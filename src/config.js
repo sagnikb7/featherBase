@@ -31,7 +31,7 @@ const config = convict({
   },
   serviceName: {
     doc: 'set service name',
-    format: ['feather-base'],
+    format: ['feather-base', ''],
     default: '',
     env: 'SERVICE_NAME',
     arg: 'service_name',
