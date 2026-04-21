@@ -1,7 +1,7 @@
 import serverless from 'serverless-http';
 import mongoose from 'mongoose';
-import config from '#config';
-import app from '#src/app.js';
+import config from '../../src/config.js';
+import app from '../../src/app.js';
 
 const mongoURI = config.get('database').mongo;
 

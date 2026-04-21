@@ -1,31 +1,11 @@
 /* eslint-disable no-unused-vars */
-import fs from 'fs';
-// TODO
 import * as Sentry from '@sentry/node';
-// import { ProfilingIntegration } from '@sentry/profiling-node';
 import { ERROR } from '#constants/error.js';
 import { CONSTANTS } from '#constants/common.js';
 
 import lgr from '#logger';
-// import { printErrors } from '#utils/chalk.js';
 
 const logger = lgr('error mw');
-
-const data = fs.readFileSync('package.json', 'utf8');
-const jsonData = JSON.parse(data);
-
-const sentryOptions = (app) => ({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV,
-  release: jsonData.version,
-  integrations: [
-    new Sentry.Integrations.Http({ tracing: true }), // enable HTTP calls tracing
-    new Sentry.Integrations.Express({ app }), // enable Express.js middleware tracing
-    // new ProfilingIntegration(),
-  ],
-  tracesSampleRate: 0.75, // Performance Monitoring , Capture 100% of the transactions, reduce in production!
-  profilesSampleRate: 0.75, // Set sampling rate for profiling - this is relative to tracesSampleRate
-});
 
 const errorMiddleware = (app, debug) => {
   logger.info('adding error middlewares');
