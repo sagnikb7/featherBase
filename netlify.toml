@@ -7,7 +7,7 @@
   NODE_VERSION = "20"
 
 [functions]
-  included_files = ["package.json"]
+  node_bundler = "none"
 
 [[redirects]]
   from = "/v1.0/*"
