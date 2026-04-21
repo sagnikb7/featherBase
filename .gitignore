@@ -86,3 +86,4 @@ public/images/birds
 .DS_Store
 reference/
 graphify-out/
+.claude/
