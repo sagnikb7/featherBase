@@ -20,14 +20,16 @@ const mode = config.get('mode');
 if (mode === 'server') {
   applicationRouter(app);
 
-  // Static files: built frontend + public assets
-  app.use(express.static(path.join(ROOT, 'web/dist')));
-  app.use(express.static(path.join(ROOT, 'public')));
+  if (!process.env.NETLIFY) {
+    // Static files: built frontend + public assets
+    app.use(express.static(path.join(ROOT, 'web/dist')));
+    app.use(express.static(path.join(ROOT, 'public')));
 
-  // SPA fallback — serve index.html for all unmatched routes
-  app.use('/', (req, res) => {
-    res.sendFile(path.join(ROOT, 'web/dist/index.html'));
-  });
+    // SPA fallback — serve index.html for all unmatched routes
+    app.use('/', (req, res) => {
+      res.sendFile(path.join(ROOT, 'web/dist/index.html'));
+    });
+  }
 } else {
   throw new Error('server type not supported');
 }

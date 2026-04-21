@@ -1,5 +1,5 @@
-/* eslint-disable max-len */
-/* eslint-disable no-shadow */
+ 
+ 
 import { createLogger, format, transports } from 'winston';
 
 const {

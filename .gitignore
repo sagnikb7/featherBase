@@ -85,3 +85,4 @@ run.dev.sh
 public/images/birds
 .DS_Store
 reference/
+graphify-out/
