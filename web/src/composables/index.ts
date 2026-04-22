@@ -1,6 +1,7 @@
 export * from './dark'
 export * from './groupColor'
 export * from './iucn'
+export * from './rarity'
 export * from './shareCard'
 
 // In dev, Vite proxy forwards /v1.0/* to the backend.

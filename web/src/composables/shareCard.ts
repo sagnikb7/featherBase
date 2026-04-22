@@ -1,5 +1,6 @@
-import type { Bird, Image } from '~/types/common'
+import type { Bird } from '~/types/common'
 import { groupColor } from './groupColor'
+import { getRarity } from './rarity'
 
 const APP_URL = 'featherbase.netlify.app'
 const CARD_W = 720
@@ -13,6 +14,14 @@ const IUCN_COLORS: Record<string, string> = {
 const IUCN_LABELS: Record<string, string> = {
   LC: 'Least Concern', NT: 'Near Threatened', VU: 'Vulnerable',
   EN: 'Endangered', CR: 'Critically Endangered', EW: 'Extinct in Wild', EX: 'Extinct',
+}
+
+const RARITY_BORDER: Record<number, { border: string; glow: string; bg2: string }> = {
+  1: { border: '#4a6a5a', glow: '', bg2: '#0a3a30' },
+  2: { border: '#4a8a9a', glow: '', bg2: '#0a303a' },
+  3: { border: '#8a6aaa', glow: 'rgba(138, 106, 170, 0.2)', bg2: '#1a1a3a' },
+  4: { border: '#c4a430', glow: 'rgba(196, 164, 48, 0.25)', bg2: '#2a2210' },
+  5: { border: '#d48040', glow: 'rgba(212, 128, 64, 0.3)', bg2: '#2a1a10' },
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -41,14 +50,18 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
   canvas.height = CARD_H
   const ctx = canvas.getContext('2d')!
 
-  // Background
+  const rarity = bird.rarity || 1
+  const rarityInfo = getRarity(rarity)
+  const rarityVisual = RARITY_BORDER[rarity] || RARITY_BORDER[1]
+
+  // Background gradient — shifts hue based on rarity
   const bg = ctx.createLinearGradient(0, 0, CARD_W, CARD_H)
   bg.addColorStop(0, '#02241d')
-  bg.addColorStop(1, '#0a3a30')
+  bg.addColorStop(1, rarityVisual.bg2)
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, CARD_W, CARD_H)
 
-  // Subtle grain texture
+  // Grain texture
   ctx.globalAlpha = 0.03
   for (let i = 0; i < 8000; i++) {
     ctx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'
@@ -56,12 +69,28 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
   }
   ctx.globalAlpha = 1
 
-  // Image area (top portion with rounded bottom)
-  const imgH = 620
-  const imgPad = 40
+  // Rarity border frame
+  const borderPad = 16
+  roundRect(ctx, borderPad, borderPad, CARD_W - borderPad * 2, CARD_H - borderPad * 2, 28)
+  ctx.strokeStyle = rarityVisual.border
+  ctx.lineWidth = rarity >= 3 ? 3 : 2
+  ctx.stroke()
+
+  // Outer glow for rare+ cards
+  if (rarityVisual.glow) {
+    ctx.shadowColor = rarityVisual.glow
+    ctx.shadowBlur = 30
+    ctx.stroke()
+    ctx.shadowColor = 'transparent'
+    ctx.shadowBlur = 0
+  }
+
+  // Image area
+  const imgH = 580
+  const imgPad = 48
   const imgW = CARD_W - imgPad * 2
   ctx.save()
-  roundRect(ctx, imgPad, imgPad, imgW, imgH, 20)
+  roundRect(ctx, imgPad, imgPad, imgW, imgH, 16)
   ctx.clip()
 
   let hasImage = false
@@ -75,7 +104,7 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
       hasImage = true
     }
     catch {
-      // CORS blocked — draw gradient fallback
+      // CORS blocked
     }
   }
 
@@ -93,8 +122,20 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
 
   ctx.restore()
 
+  // Rarity badge (top right of image)
+  const badgeText = `★ ${rarityInfo.label}`
+  ctx.font = '700 16px "Manrope", sans-serif'
+  const badgeW = ctx.measureText(badgeText).width + 20
+  const badgeX = CARD_W - imgPad - badgeW - 8
+  const badgeY = imgPad + 12
+  roundRect(ctx, badgeX, badgeY, badgeW, 28, 14)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
+  ctx.fill()
+  ctx.fillStyle = rarityVisual.border
+  ctx.fillText(badgeText, badgeX + 10, badgeY + 19)
+
   // Serial number
-  let y = imgH + imgPad + 56
+  let y = imgH + imgPad + 52
   const serial = `#${String(bird.serialNumber).padStart(3, '0')}`
   ctx.font = '600 22px "DM Mono", monospace'
   ctx.fillStyle = 'rgba(134, 212, 190, 0.5)'
@@ -103,52 +144,52 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
 
   // Bird name
   y += 52
-  ctx.font = '500 48px "Newsreader", Georgia, serif'
+  ctx.font = '500 46px "Newsreader", Georgia, serif'
   ctx.fillStyle = '#e1e3de'
-  ctx.fillText(bird.name, imgPad + 8, y)
+  const nameText = bird.name
+  const maxNameW = CARD_W - imgPad * 2 - 16
+  if (ctx.measureText(nameText).width > maxNameW) {
+    ctx.font = '500 36px "Newsreader", Georgia, serif'
+  }
+  ctx.fillText(nameText, imgPad + 8, y, maxNameW)
 
   // Scientific name
-  y += 36
-  ctx.font = 'italic 300 22px "Newsreader", Georgia, serif'
+  y += 34
+  ctx.font = 'italic 300 20px "Newsreader", Georgia, serif'
   ctx.fillStyle = 'rgba(225, 227, 222, 0.5)'
   ctx.fillText(bird.scientificName, imgPad + 8, y)
 
-  // Group tag
+  // Tags row: group + IUCN
   y += 48
   const gc = groupColor(bird.commonGroup)
-  const groupText = bird.commonGroup
-  ctx.font = '600 16px "Manrope", sans-serif'
-  const gw = ctx.measureText(groupText).width + 20
+  ctx.font = '600 15px "Manrope", sans-serif'
+  const gw = ctx.measureText(bird.commonGroup).width + 20
   roundRect(ctx, imgPad + 8, y - 16, gw, 28, 14)
   ctx.fillStyle = gc.bg.replace('0.12', '0.25')
   ctx.fill()
   ctx.fillStyle = gc.text
-  ctx.fillText(groupText, imgPad + 18, y + 4)
+  ctx.fillText(bird.commonGroup, imgPad + 18, y + 4)
 
-  // IUCN chip
+  let chipX = imgPad + 8 + gw + 10
+
   if (bird.iucnStatus && IUCN_COLORS[bird.iucnStatus]) {
     const iucnColor = IUCN_COLORS[bird.iucnStatus]
     const iucnLabel = `${bird.iucnStatus} · ${IUCN_LABELS[bird.iucnStatus]}`
     ctx.font = '500 14px "Manrope", sans-serif'
     const iw = ctx.measureText(iucnLabel).width + 32
-    const ix = imgPad + 8 + gw + 10
-    roundRect(ctx, ix, y - 16, iw, 28, 14)
+    roundRect(ctx, chipX, y - 16, iw, 28, 14)
     ctx.fillStyle = `${iucnColor}30`
     ctx.fill()
-
-    // Dot
     ctx.beginPath()
-    ctx.arc(ix + 14, y - 2, 4, 0, Math.PI * 2)
+    ctx.arc(chipX + 14, y - 2, 4, 0, Math.PI * 2)
     ctx.fillStyle = iucnColor
     ctx.fill()
-
-    ctx.fillStyle = iucnColor
-    ctx.fillText(iucnLabel, ix + 24, y + 3)
+    ctx.fillText(iucnLabel, chipX + 24, y + 3)
   }
 
-  // Divider line
+  // Divider
   y += 52
-  ctx.strokeStyle = 'rgba(134, 212, 190, 0.12)'
+  ctx.strokeStyle = `${rarityVisual.border}30`
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(imgPad + 8, y)

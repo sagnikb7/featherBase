@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Bird, Image, SingleBirdResponse } from '~/types/common'
-import { baseUrl, groupColor, shareBirdCard, useIucnStatus } from '~/composables'
+import { baseUrl, getRarity, groupColor, shareBirdCard, useIucnStatus } from '~/composables'
 import BirdImage from '~/components/BirdImage.vue'
 
 const route = useRoute()
@@ -224,6 +224,14 @@ getBirdData(birdId.value)
           <span class="iucn-dot" />
           <span class="iucn-code">{{ iucnStatus }}</span>
           <span class="iucn-label">{{ iucnStatusLabel }}</span>
+        </span>
+        <span
+          v-if="currentBird.rarity"
+          class="rarity-chip"
+          :style="{ background: getRarity(currentBird.rarity).bg, color: getRarity(currentBird.rarity).color }"
+        >
+          <span i-ph-star-fill class="rarity-star" />
+          {{ getRarity(currentBird.rarity).label }}
         </span>
       </div>
 

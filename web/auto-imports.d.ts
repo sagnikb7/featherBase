@@ -38,6 +38,8 @@ declare global {
   const generateCard: typeof import('./src/composables/shareCard')['generateCard']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
+  const getRarity: typeof import('./src/composables/rarity')['getRarity']
+  const getRarityDark: typeof import('./src/composables/rarity')['getRarityDark']
   const groupColor: typeof import('./src/composables/groupColor')['groupColor']
   const h: typeof import('vue')['h']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
@@ -335,6 +337,8 @@ declare module 'vue' {
     readonly generateCard: UnwrapRef<typeof import('./src/composables/shareCard')['generateCard']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly getRarity: UnwrapRef<typeof import('./src/composables/rarity')['getRarity']>
+    readonly getRarityDark: UnwrapRef<typeof import('./src/composables/rarity')['getRarityDark']>
     readonly groupColor: UnwrapRef<typeof import('./src/composables/groupColor')['groupColor']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
@@ -625,6 +629,8 @@ declare module '@vue/runtime-core' {
     readonly generateCard: UnwrapRef<typeof import('./src/composables/shareCard')['generateCard']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly getRarity: UnwrapRef<typeof import('./src/composables/rarity')['getRarity']>
+    readonly getRarityDark: UnwrapRef<typeof import('./src/composables/rarity')['getRarityDark']>
     readonly groupColor: UnwrapRef<typeof import('./src/composables/groupColor')['groupColor']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>

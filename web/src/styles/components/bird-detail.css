@@ -273,6 +273,23 @@
 .dark .iucn-chip--ex  { --iucn-dot: #909090; --iucn-bg: rgba(144, 144, 144, 0.12); --iucn-text: #a0a0a0; }
 .dark .iucn-chip--unknown { --iucn-dot: #5e6f68; --iucn-bg: rgba(94, 111, 104, 0.12); --iucn-text: var(--color-text-muted); }
 
+/* ── Rarity chip ── */
+.rarity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px 3px 7px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+}
+
+.rarity-star {
+  font-size: 10px;
+}
+
 /* ── Callout ── */
 .detail-callout {
   font-family: var(--font-serif);
