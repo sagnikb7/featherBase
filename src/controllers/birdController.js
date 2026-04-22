@@ -1,5 +1,7 @@
 import { getBirdById, getAllBirds, getGroups } from '#services/birdService.js';
 
+const ALLOWED_IMAGE_HOSTS = ['cdn.download.ams.birds.cornell.edu'];
+
 const getBirdsController = async (req, res, next) => {
   try {
     const { id } = req.validated?.params || req.params;
@@ -45,4 +47,27 @@ const getGroupsController = async (req, res, next) => {
   }
 };
 
-export { getBirdsController, getAllBirdsController, getGroupsController };
+const imageProxyController = async (req, res, next) => {
+  try {
+    const { url } = req.query;
+    if (!url) return res.status(400).json({ error: 'url param required' });
+
+    const parsed = new URL(url);
+    if (!ALLOWED_IMAGE_HOSTS.includes(parsed.hostname)) {
+      return res.status(403).json({ error: 'host not allowed' });
+    }
+
+    const response = await fetch(url);
+    if (!response.ok) return res.status(response.status).end();
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    res.set('Content-Type', contentType);
+    res.set('Cache-Control', 'public, max-age=86400');
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.send(buffer);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { getBirdsController, getAllBirdsController, getGroupsController, imageProxyController };

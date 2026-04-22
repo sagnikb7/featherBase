@@ -64,6 +64,11 @@ The app is installable as a Progressive Web App:
 - `web/public/logo.svg` — maskable icon (forest green background, mint feather)
 - Cache name: `featherbase-v1` — bump the version to invalidate on deploy
 
+## Git Rules
+
+- NEVER push to remote without explicit user approval. Commit locally and wait for review.
+- Always show a summary of changes and ask before running `git push`.
+
 ## Lint Rules
 
 ESLint with airbnb-base. Max line length: 120 chars. `import/no-unresolved` and `import/extensions` are disabled (needed for subpath imports).
