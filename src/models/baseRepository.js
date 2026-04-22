@@ -28,6 +28,10 @@ class BaseRepository {
     return data;
   }
 
+  async aggregate(pipeline) {
+    return this.model.aggregate(pipeline);
+  }
+
   async create(newObj) {
     const obj = new this.model(newObj);
     const result = await obj.save();

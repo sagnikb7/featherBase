@@ -1,2 +1,1 @@
-export const isDark = useDark()
-export const toggleDark = useToggle(isDark)
+// isDark is exported from settings.ts — this file is kept for backwards compatibility

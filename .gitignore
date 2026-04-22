@@ -85,6 +85,5 @@ run.dev.sh
 public/images/birds
 .DS_Store
 reference/*
-!reference/cards/
 graphify-out/
 .claude/

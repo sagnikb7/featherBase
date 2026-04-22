@@ -8,7 +8,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr auto;
-  height: calc(100vh - 56px);
+  height: calc(100vh - 60px);
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -218,7 +218,57 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+/* ── Share CTA button ── */
+.bird-share-cta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-accent);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.bird-share-cta:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.bird-share-cta:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.bird-share-cta-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.bird-share-cta-arrow {
+  font-size: 14px;
+  margin-left: auto;
+  opacity: 0.6;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.bird-share-cta:hover:not(:disabled) .bird-share-cta-arrow {
+  transform: translateX(3px);
+  opacity: 1;
 }
 
 /* ── IUCN Status Chip ── */

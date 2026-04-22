@@ -146,3 +146,46 @@
     transparent 100%
   );
 }
+
+/* ── Midnight theme — deep violet, unlocked via Spread the Word ── */
+.dark.midnight {
+  --color-bg: #09091a;
+  --color-bg-raised: #0f0f26;
+  --color-bg-input: #14143a;
+  --color-bg-muted: #1c1c4a;
+
+  --color-text: #e8e6f6;
+  --color-text-muted: #9e9ac0;
+  --color-text-faint: #6a6690;
+
+  --color-border: rgba(167, 139, 250, 0.14);
+  --color-divider: rgba(167, 139, 250, 0.09);
+
+  --color-accent: #a78bfa;
+  --color-accent-hover: #c4b5fd;
+  --color-accent-light: rgba(167, 139, 250, 0.12);
+
+  --color-secondary: #1e1e4a;
+  --color-secondary-dim: #161638;
+
+  --gradient-primary: linear-gradient(135deg, #a78bfa, #c4b5fd);
+
+  --color-danger: #f87171;
+  --color-danger-light: rgba(248, 113, 113, 0.1);
+  --color-danger-text: #f87171;
+  --color-success: #6ee7b7;
+
+  --glass-bg: rgba(9, 9, 26, 0.88);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-up-sm: 0 -1px 8px rgba(0, 0, 0, 0.3);
+
+  --surface-gradient: linear-gradient(
+    180deg,
+    rgba(167, 139, 250, 0.025) 0%,
+    transparent 100%
+  );
+}

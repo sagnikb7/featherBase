@@ -117,30 +117,39 @@ All other scale values unchanged.
 
 ## 3. Component Improvements
 
-### 3.1 Header
+### 3.1 Home Page Hero
 
-| Property | Before | After |
-|---|---|---|
-| `.header-title` weight | 300 | 400 |
-| `.header-logo` size | 22px | 24px |
-| Bottom border | none | `1px solid var(--color-divider)` |
+`TheHeader.vue` (sticky site header) was removed. The home page now owns its own inline hero: `.page-hero` with logo, title ("FeatherBase"), and tagline ("Birds of the Indian Subcontinent"). No persistent header chrome above the list — cleaner on mobile.
+
+**Bird of the day:** seeded by `Math.floor(Date.now() / 86400000) % total` — same bird for all users on a given day. Rendered as a card above the bird list. Non-critical; silently omitted on fetch failure.
+
+**Group chips:** up to 8, seeded-shuffled daily using `seededShuffle()` (LCG with `todaySeed`). Each chip shows the group name and bird count. Consistent order within a day; rotates overnight without being random per visit.
 
 ### 3.2 Bird List Rows
 
 **Resting state:**
-- `.bird-row-name`: weight 400 → 500
-- `.bird-row-scientific`: `--text-xs` → `--text-sm`, weight 300 → 400
-- `.bird-row-group`: font-size 10px → 11px, padding `2px 8px` → `3px 10px`
-- Row dividers: already covered by `--color-divider` opacity increase
+- `.bird-row-name`: weight 500
+- `.bird-row-scientific`: `--text-sm`, weight 400
+- `.bird-row-group`: font-size 11px, padding `3px 10px`
+- Row padding: `14px var(--space-4)` for 48px touch target
+- Row dividers: `1px solid var(--color-divider)` (12-18% opacity — must be visible)
+- Entrance animation: `row-enter` (opacity 0 → 1, translateY 8px → 0), staggered 28ms per row for first 8, disabled via `prefers-reduced-motion`
+
+**Per-row identity via CSS variables (set as inline style from `groupColor()`):**
+- `--row-accent`: group text color — used for left accent bar, serial on hover
+- `--row-accent-bg`: group bg color — used for hover background tint
 
 **Hover state (desktop):**
-- Add `box-shadow: var(--shadow-sm)`
-- Add `transform: translateX(2px)` with transition
-- Keep background shift
+- `box-shadow: inset 3px 0 0 var(--row-accent), var(--shadow-sm)` — left accent bar via inset shadow (zero layout impact), combined with elevation
+- `background: var(--row-accent-bg)` — group-tinted background, not generic `--color-bg-input`
+- `transform: translateX(4px)`
+- `.bird-row-serial` color → `var(--row-accent)`
+- `.bird-row-arrow` slides in from `translateX(-4px)` → 0
 
 **Active state (touch):**
 - `background: var(--color-bg-muted)`
 - `transform: scale(0.998)` for tactile feedback
+- `box-shadow: none`
 
 ### 3.3 Search
 
@@ -179,14 +188,27 @@ The upward shadow sells the overlap illusion and creates the single biggest "dep
 
 ### 3.7 Bottom Nav
 
+The dark-mode toggle button was removed from BottomNav. Theme is now controlled via the Settings page. Nav items are now **Birds** (home, `i-ph-bird-duotone`) and **Settings** (`i-ph-gear-duotone`) — both `<RouterLink>` with active class.
+
 | Property | Before | After |
 |---|---|---|
+| Items | Home + Dark toggle | Birds + Settings (router links) |
 | Icon size | 22px | 24px |
 | Label size | 10px | 11px |
 | Shadow | none | `var(--shadow-up-sm)` |
 | Active indicator | color only | color + `font-weight: 700` on label |
 
-### 3.8 IUCN / Rarity Chips
+### 3.8 Settings Page
+
+Route `/settings`. Layout: centered column, `max-width: 720px`. Two sections — Appearance and Spread the Word — then an About card at bottom.
+
+**Theme picker:** 3-column grid for light/dark/auto. Midnight is a full-width row (`grid-column: 1 / -1`) in horizontal layout with a shimmer animation (`midnight-sheen` keyframes) when unlocked, hidden until the user completes the "Spread the Word" action.
+
+**Spread the Word card:** sharing the bird-of-the-day card via Web Share API unlocks the Midnight theme. On success: `unlockMidnight()` + `fireUnlockConfetti()` + `.spread-success` reveal (CSS `v-if` animation, no `<Transition>` wrapper needed).
+
+**Midnight theme tokens** (`.dark.midnight` in `tokens.css`): deep violet base `#09091a`, accent `#a78bfa`, surface gradient uses violet at 2.5%. All elevation shadows are tuned for the violet palette. The `midnight` class is applied to `<html>` alongside `dark`.
+
+### 3.9 IUCN / Rarity Chips
 
 - Font size: 11px → 12px
 - Add `box-shadow: var(--shadow-xs)` for subtle lift

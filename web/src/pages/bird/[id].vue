@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Bird, Image, SingleBirdResponse } from '~/types/common'
-import { baseUrl, getRarity, groupColor, shareBirdCard, useIucnStatus } from '~/composables'
+import { baseUrl, formatSerial, getRarity, groupColor, shareBirdCard, useIucnStatus } from '~/composables'
 import BirdImage from '~/components/BirdImage.vue'
 
 const route = useRoute()
@@ -137,7 +137,9 @@ watch(
 <template>
   <div v-if="loading" class="detail-loader">
     <div class="loader" role="status">
-      <img src="/favicon.svg" alt="" class="loader-feather">
+      <div class="loader-dots">
+        <span /><span /><span />
+      </div>
     </div>
   </div>
   <div v-else-if="currentBird" class="bird-detail">
@@ -209,27 +211,17 @@ watch(
           <span>Prev</span>
         </button>
         <span class="bird-serial">
-          #{{ String(currentBird.serialNumber).padStart(3, '0') }}
+          {{ formatSerial(currentBird.serialNumber) }}
         </span>
-        <div class="bird-nav-actions">
-          <button
-            class="bird-nav-btn"
-            :disabled="sharing"
-            aria-label="Share bird card"
-            @click="share"
-          >
-            <div i-ph-share-network />
-          </button>
-          <button
-            class="bird-nav-btn"
-            :disabled="!currentBird"
-            aria-label="Next bird"
-            @click="navigate(birdId + 1)"
-          >
-            <span>Next</span>
-            <div i-ph-caret-right />
-          </button>
-        </div>
+        <button
+          class="bird-nav-btn"
+          :disabled="!currentBird"
+          aria-label="Next bird"
+          @click="navigate(birdId + 1)"
+        >
+          <span>Next</span>
+          <div i-ph-caret-right />
+        </button>
       </div>
 
       <div class="bird-identity">
@@ -265,6 +257,18 @@ watch(
           {{ getRarity(currentBird.rarity).label }}
         </span>
       </div>
+
+      <button
+        class="bird-share-cta"
+        :class="{ 'bird-share-cta--loading': sharing }"
+        :disabled="sharing"
+        aria-label="Share bird card"
+        @click="share"
+      >
+        <div i-ph-paper-plane-tilt-duotone class="bird-share-cta-icon" />
+        <span>{{ sharing ? 'Creating card…' : 'Share Bird Card' }}</span>
+        <div i-ph-arrow-right class="bird-share-cta-arrow" />
+      </button>
 
       <p class="detail-callout">
         {{ currentBird.identification }}

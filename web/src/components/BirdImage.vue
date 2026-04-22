@@ -70,11 +70,12 @@ function onError() {
   failed.value = true
 }
 
-// Reset state when src changes
+// flush:sync resets state before any DOM patch, preventing a race where
+// a cached image fires @load during the patch and then gets overridden by the watcher
 watch(() => props.src, () => {
   loaded.value = false
   failed.value = false
-})
+}, { flush: 'sync' })
 </script>
 
 <template>
@@ -83,7 +84,6 @@ watch(() => props.src, () => {
       v-if="src && !failed"
       :src="src"
       :alt="alt"
-      loading="lazy"
       class="bird-img"
       :class="{ 'bird-img--loaded': loaded }"
       @load="onLoad"

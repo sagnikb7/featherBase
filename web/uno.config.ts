@@ -7,6 +7,13 @@ import {
 } from 'unocss'
 
 export default defineConfig({
+  // Icons used via dynamic :class bindings — static scanner can't detect these
+  safelist: [
+    'i-ph-sun-duotone',
+    'i-ph-moon-duotone',
+    'i-ph-device-mobile-duotone',
+    'i-ph-shooting-star-duotone',
+  ],
   shortcuts: [
     [
       'btn',

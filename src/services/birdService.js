@@ -74,10 +74,16 @@ const getGroups = async () => {
   const cached = cache.get('groups');
   if (cached) return cached;
 
-  const groups = await birdModel.distinct('commonGroup');
-  const sorted = groups.filter(Boolean).sort();
-  cache.set('groups', sorted);
-  return sorted;
+  const groups = await birdModel.aggregate([
+    { $match: { commonGroup: { $exists: true, $nin: [null, ''] } } },
+    { $group: { _id: '$commonGroup', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $project: { _id: 0, title: '$_id', count: 1 } },
+  ]);
+
+  const result = groups.filter((g) => g.title);
+  cache.set('groups', result);
+  return result;
 };
 
 export { getBirdById, getAllBirds, getGroups };

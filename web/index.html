@@ -43,9 +43,13 @@
         var prefersDark =
           window.matchMedia &&
           window.matchMedia('(prefers-color-scheme: dark)').matches
-        var setting = localStorage.getItem('color-schema') || 'auto'
-        if (setting === 'dark' || (prefersDark && setting !== 'light'))
-          document.documentElement.classList.toggle('dark', true)
+        var theme = 'auto'
+        try {
+          var raw = localStorage.getItem('featherbase-settings')
+          if (raw) theme = JSON.parse(raw).theme || 'auto'
+        } catch (e) {}
+        if (theme === 'dark' || (theme === 'auto' && prefersDark))
+          document.documentElement.classList.add('dark')
       })()
     </script>
     <script type="module" src="/src/main.ts"></script>

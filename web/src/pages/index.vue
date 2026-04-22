@@ -1,11 +1,31 @@
 <script setup lang="ts">
-import { baseUrl, groupColor } from '~/composables'
+import { baseUrl, formatSerial, groupColor } from '~/composables'
+
+interface GroupEntry { title: string; count: number }
+
+function seededRandom(seed: number) {
+  let s = seed >>> 0
+  return () => {
+    s = (Math.imul(1664525, s) + 1013904223) >>> 0
+    return s / 0x100000000
+  }
+}
+
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  const rng = seededRandom(seed)
+  const result = [...arr]
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
 
 const PAGE_SIZE = 20
 
 const searchQuery = ref('')
 const selectedGroup = ref('')
-const groups = ref<string[]>([])
+const groups = ref<GroupEntry[]>([])
 const birds = ref<any[]>([])
 const searchResults = ref<any[]>([])
 const loading = ref(true)
@@ -15,10 +35,18 @@ const showDropdown = ref(false)
 const error = ref<string | null>(null)
 const hasNext = ref(false)
 const currentPage = ref(1)
+const totalCount = ref(0)
+const birdOfTheDay = ref<any>(null)
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 const isSearchActive = computed(() => searchQuery.value.length >= 3)
+
+const todaySeed = Math.floor(Date.now() / 86400000)
+
+const orderedChips = computed(() =>
+  seededShuffle(groups.value, todaySeed).slice(0, 8),
+)
 
 async function fetchGroups() {
   try {
@@ -29,6 +57,24 @@ async function fetchGroups() {
   }
   catch {
     // groups are non-critical
+  }
+}
+
+function selectGroup(group: string) {
+  selectedGroup.value = group
+  onGroupChange()
+}
+
+async function fetchBirdOfTheDay(total: number) {
+  const serial = (todaySeed % total) + 1
+  try {
+    const response = await fetch(`${baseUrl}/v1.0/birds/${serial}`)
+    const result = await response.json()
+    if (result.success && result.data?.serialNumber)
+      birdOfTheDay.value = result.data
+  }
+  catch {
+    // non-critical
   }
 }
 
@@ -51,6 +97,9 @@ async function fetchBirds(page = 1) {
       birds.value = isFirstPage ? result.data : [...birds.value, ...result.data]
       hasNext.value = result.pagination.hasNext
       currentPage.value = result.pagination.page
+      totalCount.value = result.pagination.total
+      if (isFirstPage && !selectedGroup.value && !birdOfTheDay.value)
+        fetchBirdOfTheDay(result.pagination.total)
     }
     else {
       throw new Error('Failed to fetch birds data')
@@ -162,82 +211,141 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="search-container">
-    <div class="search-row">
-      <div class="search-input-wrap">
-        <label class="sr-only" for="bird-search">Search birds</label>
-        <div i-ph-magnifying-glass class="search-icon" />
-        <input
-          id="bird-search"
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search by name or scientific name..."
-          autocomplete="off"
-          :disabled="loading"
-          @input="onSearchInput"
-          @focus="isSearchActive && searchResults.length && (showDropdown = true)"
-          @blur="dismissDropdown"
-        >
-        <button
-          v-if="searchQuery"
-          class="search-clear"
-          aria-label="Clear search"
-          @mousedown.prevent="clearSearch"
-        >
-          <div i-ph-x />
-        </button>
+  <div class="home-page">
 
-        <div v-if="showDropdown" class="search-dropdown">
-          <div v-if="searching" class="search-dropdown-status">
-            Searching...
-          </div>
-          <template v-else-if="searchResults.length">
-            <a
-              v-for="bird in searchResults"
-              :key="bird.id"
-              :href="`/bird/${bird.id}`"
-              class="search-result"
-            >
-              <span class="search-result-serial">#{{ String(bird.serialNumber).padStart(3, '0') }}</span>
-              <div class="search-result-info">
-                <span class="search-result-name">{{ bird.name }}</span>
-                <span class="search-result-scientific">{{ bird.scientificName }}</span>
-              </div>
-              <span
-                v-if="bird.commonGroup"
-                class="search-result-group capitalize"
-                :style="{ background: groupColor(bird.commonGroup).bg, color: groupColor(bird.commonGroup).text }"
-              >{{ bird.commonGroup }}</span>
-            </a>
-          </template>
-          <div v-else class="search-dropdown-status">
-            No birds found for "{{ searchQuery }}"
-          </div>
+  <header class="page-hero">
+    <div class="page-hero-brand">
+      <img src="/favicon.svg" alt="" class="page-hero-logo" width="28" height="28">
+      <h1 class="page-hero-title">
+        FeatherBase
+      </h1>
+    </div>
+    <p class="page-hero-tagline">
+      Birds of the Indian Subcontinent
+    </p>
+  </header>
+
+  <div class="search-container">
+    <div class="search-input-wrap">
+      <label class="sr-only" for="bird-search">Search birds</label>
+      <div i-ph-magnifying-glass class="search-icon" />
+      <input
+        id="bird-search"
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search by name or scientific name..."
+        autocomplete="off"
+        :disabled="loading"
+        @input="onSearchInput"
+        @focus="isSearchActive && searchResults.length && (showDropdown = true)"
+        @blur="dismissDropdown"
+      >
+      <button
+        v-if="searchQuery"
+        class="search-clear"
+        aria-label="Clear search"
+        @mousedown.prevent="clearSearch"
+      >
+        <div i-ph-x />
+      </button>
+
+      <div v-if="showDropdown" class="search-dropdown">
+        <div v-if="searching" class="search-dropdown-status">
+          Searching...
+        </div>
+        <template v-else-if="searchResults.length">
+          <a
+            v-for="bird in searchResults"
+            :key="bird.id"
+            :href="`/bird/${bird.id}`"
+            class="search-result"
+          >
+            <span class="search-result-serial">{{ formatSerial(bird.serialNumber) }}</span>
+            <div class="search-result-info">
+              <span class="search-result-name">{{ bird.name }}</span>
+              <span class="search-result-scientific">{{ bird.scientificName }}</span>
+            </div>
+            <span
+              v-if="bird.commonGroup"
+              class="search-result-group capitalize"
+              :style="{ background: groupColor(bird.commonGroup).bg, color: groupColor(bird.commonGroup).text }"
+            >{{ bird.commonGroup }}</span>
+          </a>
+        </template>
+        <div v-else class="search-dropdown-status">
+          No birds found for "{{ searchQuery }}"
         </div>
       </div>
+    </div>
 
-      <label class="sr-only" for="group-filter">Filter by group</label>
-      <select
-        id="group-filter"
-        v-model="selectedGroup"
-        :disabled="loading"
-        @change="onGroupChange"
+    <div v-if="groups.length" class="group-chips">
+      <button
+        class="group-chip"
+        :class="{ active: selectedGroup === '' }"
+        @click="selectGroup('')"
       >
-        <option value="">
-          All Groups
-        </option>
-        <option v-for="g in groups" :key="g" :value="g">
-          {{ g }}
-        </option>
-      </select>
+        All
+      </button>
+      <button
+        v-for="chip in orderedChips"
+        :key="chip.title"
+        class="group-chip capitalize"
+        :class="{ active: selectedGroup === chip.title }"
+        :style="selectedGroup === chip.title
+          ? { background: groupColor(chip.title).bg, color: groupColor(chip.title).text, borderColor: groupColor(chip.title).text + '33' }
+          : {}"
+        @click="selectGroup(chip.title)"
+      >
+        {{ chip.title }}
+        <span class="chip-count">{{ chip.count }}</span>
+      </button>
     </div>
     <div v-if="loading" class="loader" role="status">
-      <img src="/favicon.svg" alt="" class="loader-feather">
-      <span class="loader-text">Loading birds</span>
+      <div class="loader-dots">
+        <span /><span /><span />
+      </div>
     </div>
     <div v-if="error" class="status-box error" role="alert">
       {{ error }}
     </div>
+  </div>
+
+  <a
+    v-if="birdOfTheDay && !selectedGroup"
+    :href="`/bird/${birdOfTheDay.serialNumber}`"
+    class="botd-card"
+    :style="{ '--botd-accent': groupColor(birdOfTheDay.commonGroup)?.text ?? 'var(--color-accent)' }"
+  >
+    <p class="botd-eyebrow">
+      Bird of the Day
+    </p>
+    <p class="botd-name">
+      {{ birdOfTheDay.name }}
+    </p>
+    <p class="botd-scientific">
+      {{ birdOfTheDay.scientificName }}
+    </p>
+    <div class="botd-footer">
+      <div class="botd-meta">
+        <span class="botd-serial">{{ formatSerial(birdOfTheDay.serialNumber) }}</span>
+        <span
+          v-if="birdOfTheDay.commonGroup"
+          class="bird-row-group capitalize"
+          :style="{ background: groupColor(birdOfTheDay.commonGroup).bg, color: groupColor(birdOfTheDay.commonGroup).text }"
+        >{{ birdOfTheDay.commonGroup }}</span>
+      </div>
+      <span class="botd-cta">
+        Explore <div i-ph-arrow-right />
+      </span>
+    </div>
+  </a>
+
+  <div v-if="!loading" class="index-header">
+    <span class="index-header-label">
+      <span i-ph-list-dashes class="index-header-icon" />
+      {{ selectedGroup ? selectedGroup : 'Field Index' }}
+    </span>
+    <span class="index-header-count">{{ totalCount }} species</span>
   </div>
 
   <div v-if="!loading" class="bird-list">
@@ -246,8 +354,9 @@ onUnmounted(() => {
       :key="bird.id"
       :href="`/bird/${bird.id}`"
       class="bird-row"
+      :style="{ '--row-accent': groupColor(bird.commonGroup).text, '--row-accent-bg': groupColor(bird.commonGroup).bg }"
     >
-      <span class="bird-row-serial">#{{ String(bird.serialNumber).padStart(3, '0') }}</span>
+      <span class="bird-row-serial">{{ formatSerial(bird.serialNumber) }}</span>
       <div class="bird-row-info">
         <span class="bird-row-name">{{ bird.name }}</span>
         <span class="bird-row-scientific">{{ bird.scientificName }}</span>
@@ -265,5 +374,6 @@ onUnmounted(() => {
     <div v-if="loadingMore" class="scroll-loader-dots">
       <span /><span /><span />
     </div>
+  </div>
   </div>
 </template>

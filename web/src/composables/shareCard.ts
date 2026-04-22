@@ -1,3 +1,4 @@
+import { formatSerial } from './format'
 import { groupColor } from './groupColor'
 import { getRarity } from './rarity'
 import type { Bird } from '~/types/common'
@@ -167,7 +168,7 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
   ctx.stroke()
 
   // Serial pill — top-left of image
-  const serial = `#${String(bird.serialNumber).padStart(3, '0')}`
+  const serial = formatSerial(bird.serialNumber)
   ctx.font = '700 18px "DM Mono", monospace'
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
@@ -274,7 +275,7 @@ export async function shareBirdCard(bird: Bird, imageUrl: string) {
   if (navigator.share && navigator.canShare?.({ files: [file] })) {
     await navigator.share({
       title: `${bird.name} — FeatherBase`,
-      text: `Check out ${bird.name} (#${String(bird.serialNumber).padStart(3, '0')}) on FeatherBase`,
+      text: `Check out ${bird.name} (${formatSerial(bird.serialNumber)}) on FeatherBase`,
       url: `https://${APP_URL}/bird/${bird.serialNumber}`,
       files: [file],
     })

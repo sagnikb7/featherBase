@@ -15,11 +15,13 @@
   "dependencies": {
     "@iconify-json/ph": "^1.1.14",
     "@vueuse/core": "^10.11.0",
+    "canvas-confetti": "^1.9.4",
     "vue": "^3.4.35",
     "vue-router": "^4.4.2"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.24.1",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.1.0",
     "@unocss/eslint-config": "^0.61.9",
     "@unocss/eslint-plugin": "^0.61.9",

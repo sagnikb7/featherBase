@@ -1,27 +1,34 @@
 <script setup lang="ts">
 const route = useRoute()
 
-const isHome = computed(() => route.path === '/')
+const isHome = computed(() => route?.path === '/')
+const isSettings = computed(() => route?.path === '/settings')
 </script>
 
 <template>
-  <nav class="bottom-nav" aria-label="Mobile navigation">
-    <a
-      href="/"
+  <nav class="bottom-nav" aria-label="Navigation">
+    <RouterLink
+      to="/"
       class="bottom-nav-item"
       :class="{ active: isHome }"
-      aria-label="Home"
+      aria-label="Birds"
     >
-      <div i-ph-house-duotone class="bottom-nav-icon" />
-      <span class="bottom-nav-label">Home</span>
-    </a>
-    <button
+      <div class="bottom-nav-icon-wrap">
+        <div i-ph-bird-duotone class="bottom-nav-icon" />
+      </div>
+      <span class="bottom-nav-label">Birds</span>
+    </RouterLink>
+
+    <RouterLink
+      to="/settings"
       class="bottom-nav-item"
-      aria-label="Toggle dark mode"
-      @click="toggleDark()"
+      :class="{ active: isSettings }"
+      aria-label="Settings"
     >
-      <div i-ph-sun-duotone dark:i-ph-moon-duotone class="bottom-nav-icon" />
-      <span class="bottom-nav-label">{{ isDark ? 'Light' : 'Dark' }}</span>
-    </button>
+      <div class="bottom-nav-icon-wrap">
+        <div i-ph-gear-duotone class="bottom-nav-icon" />
+      </div>
+      <span class="bottom-nav-label">Settings</span>
+    </RouterLink>
   </nav>
 </template>
