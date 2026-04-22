@@ -1,6 +1,27 @@
+<script setup lang="ts">
+import { toggleDark } from '~/composables'
+
+const route = useRoute()
+const hidden = ref(false)
+let lastScrollY = 0
+
+const isDetailPage = computed(() => route.path.startsWith('/bird/'))
+
+function onScroll() {
+  const y = window.scrollY
+  if (Math.abs(y - lastScrollY) < 10) return
+  hidden.value = isDetailPage.value && y > lastScrollY && y > 56
+  lastScrollY = y
+}
+
+onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
+onUnmounted(() => window.removeEventListener('scroll', onScroll))
+</script>
+
 <template>
   <nav
     class="header"
+    :class="{ 'header--hidden': hidden }"
     :style="{
       background: 'var(--glass-bg)',
       backdropFilter: 'blur(var(--glass-blur))',
