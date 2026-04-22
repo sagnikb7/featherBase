@@ -68,7 +68,7 @@
   /* ── Radii ── */
   --radius-sm: 4px;
   --radius-md: 8px;
-  --radius-lg: 0.5rem;
+  --radius-lg: 12px;
   --radius-full: 9999px;
 
   /* ── Elevation ── */
@@ -77,9 +77,6 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05);
   --shadow-up-sm: 0 -1px 6px rgba(0, 0, 0, 0.06);
-  --shadow-card: none;
-  --shadow-card-hover: 0 4px 24px rgba(28, 28, 25, 0.08),
-    0 1px 4px rgba(28, 28, 25, 0.04);
   --shadow-focus: 0 0 0 3px var(--color-accent-light);
 
   /* ── Surface gradient (subtle dimensionality) ── */
@@ -128,6 +125,7 @@
   --color-danger: #e07060;
   --color-danger-light: rgba(224, 112, 96, 0.08);
   --color-danger-text: #e07060;
+  --color-success: #6ee7b7;
 
   --glass-bg: rgba(12, 18, 16, 0.8);
 
@@ -136,10 +134,6 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.28), 0 1px 3px rgba(0, 0, 0, 0.18);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.18);
   --shadow-up-sm: 0 -1px 6px rgba(0, 0, 0, 0.18);
-  --shadow-card: none;
-  --shadow-card-hover: 0 4px 24px rgba(0, 0, 0, 0.18),
-    0 1px 4px rgba(0, 0, 0, 0.08);
-
   --surface-gradient: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.025) 0%,

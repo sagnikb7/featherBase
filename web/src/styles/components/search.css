@@ -6,7 +6,7 @@
 .page-hero {
   max-width: 720px;
   margin: 0 auto;
-  padding: var(--space-10) var(--space-5) var(--space-6);
+  padding: var(--space-10) var(--space-5) var(--space-8);
 }
 
 .page-hero-title {
@@ -43,7 +43,7 @@
 /* ── Search container ── */
 .search-container {
   max-width: 720px;
-  margin: 0 auto var(--space-4);
+  margin: 0 auto var(--space-6);
   padding: 0 var(--space-5);
 }
 
@@ -283,7 +283,7 @@
 .botd-card {
   display: block;
   max-width: 720px;
-  margin: var(--space-5) auto var(--space-2);
+  margin: 0 auto var(--space-6);
   padding: var(--space-4) var(--space-5);
   text-decoration: none;
   color: var(--color-text);
@@ -305,7 +305,7 @@
 
 .botd-eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -363,12 +363,14 @@
 /* ── Field Index section header ── */
 .index-header {
   max-width: 720px;
-  margin: var(--space-6) auto 0;
-  padding: 0 var(--space-4) var(--space-3);
+  margin: 0 auto;
+  padding: 0 var(--space-5) var(--space-3);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-top: 1px solid var(--color-divider);
   border-bottom: 1px solid var(--color-divider);
+  padding-top: var(--space-3);
 }
 
 .index-header-label {
@@ -399,7 +401,7 @@
 .bird-list {
   max-width: 720px;
   margin: 0 auto;
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-5);
 }
 
 @keyframes row-enter {
@@ -590,7 +592,7 @@
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .page-hero {
-    padding: var(--space-6) var(--space-5) var(--space-4);
+    padding: var(--space-6) var(--space-5) var(--space-6);
   }
 
   .page-hero-title {
@@ -598,7 +600,7 @@
   }
 
   .search-container {
-    margin: 0 auto var(--space-3);
+    margin: 0 auto var(--space-5);
   }
 
   .search-dropdown {
@@ -611,13 +613,17 @@
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
 
+  .botd-card {
+    margin-bottom: var(--space-5);
+  }
+
   .bird-list {
-    padding: 0 var(--space-3);
+    padding: 0 var(--space-4);
   }
 
   .bird-row {
-    padding: 14px var(--space-4);
-    gap: var(--space-3);
+    padding: 14px var(--space-3);
+    gap: var(--space-2);
   }
 
   .bird-row-arrow {
