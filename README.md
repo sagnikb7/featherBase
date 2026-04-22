@@ -138,7 +138,7 @@ featherBase/
 | `GET` | `/v1.0/birds/groups` | — | All bird group names (cached 1h) |
 | `GET` | `/v1.0/birds/:id` | — | Full bird details + image metadata |
 
-The `search` param (min 3 chars) does case-insensitive matching on `name` and `scientificName`. All filter inputs are regex-escaped to prevent injection.
+The `search` param (min 3 chars) does case-insensitive matching on `name` and `scientificName`. If the term is a plain integer (e.g. `300`), it also matches `serialNumber` exactly. All filter inputs are regex-escaped to prevent injection.
 
 ---
 
@@ -174,5 +174,7 @@ Alternatively, deploy on **Render** using `render.yaml` at the project root — 
 ## Data Pipeline
 
 1. **Extract bird names** — Python scrapers in `DataCollector/` pull from Wikipedia and dibird.com
-2. **Generate bird data** — Feed batches of 10 names to an LLM with a structured prompt, save as `data/birds/<n>.json`
+2. **Generate bird data** — Feed batches of 10 names to an LLM using the prompt in [`DataCollector/prompt.txt`](DataCollector/prompt.txt), save as `data/birds/<n>.json`
 3. **Insert into MongoDB** — `src/scripts/insert-birds.js` transforms fields, deduplicates by scientific name, and bulk-inserts with sequential serial numbers
+
+> **Note on data origin:** All bird data in this database is **AI-generated** using the prompt in `DataCollector/prompt.txt` — it is not scraped or copied from any third-party source. Because it is LLM-generated, some fields (IUCN status, distribution, sighting hotspots) may contain inaccuracies. Always cross-check critical data against authoritative sources such as the IUCN Red List or eBird.

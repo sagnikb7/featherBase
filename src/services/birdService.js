@@ -26,9 +26,11 @@ const getAllBirds = async ({ page = 1, size = 10, search, family, group, order }
   const filter = {};
   if (search) {
     const escaped = escapeRegex(search);
+    const serialNum = /^\d+$/.test(search) ? Number(search) : null;
     filter.$or = [
       { name: { $regex: escaped, $options: 'i' } },
       { scientificName: { $regex: escaped, $options: 'i' } },
+      ...(serialNum !== null ? [{ serialNumber: serialNum }] : []),
     ];
   }
   if (family) filter.family = { $regex: new RegExp(`^${escapeRegex(family)}$`, 'i') };
