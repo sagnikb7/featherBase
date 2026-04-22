@@ -216,7 +216,29 @@ Route `/settings`. Layout: centered column, `max-width: 720px`. Two sections —
 
 ---
 
-## 4. Mobile-Specific (6.1" target)
+## 4. Layout Mode System
+
+There are exactly two layout modes in FeatherBase. Every page must fit one of them.
+
+### Browse mode — `max-width: 720px`
+Used by: home (`/`), settings (`/settings`), any future list or utility pages.
+
+Single-column, centered within a 720px shell. The bottom nav also caps at 720px. This constraint exists by design — it keeps text line lengths readable, gives the app a focused Pokédex feel, and ensures the nav and content always align.
+
+**Rule: any new browse-mode page must use `max-width: 720px` on its root container.**
+
+### Detail mode — `max-width: 1024px`
+Used by: bird detail (`/bird/:id`).
+
+Two-column grid (`1fr 1fr`), `height: calc(100vh - 60px)`, centered within a 1024px shell. This is wider than browse mode by design — the detail page is an immersive "dossier" experience, not a list. At 1024px each column is ~512px: adequate for an image carousel and comfortable for body text.
+
+**Rule: `max-width` must not exceed 1024px on the detail page. Do not shrink it to 720px — the columns would be too narrow for the image.**
+
+On mobile (`≤ 768px`) the detail page collapses to a single-column stacked layout (flex, `height: auto`).
+
+---
+
+## 6. Mobile-Specific (6.1" target)
 
 ### Touch targets
 - Bird row: minimum 48px total height (increase padding to `14px 16px`)
@@ -240,7 +262,7 @@ Route `/settings`. Layout: centered column, `max-width: 720px`. Two sections —
 
 ---
 
-## 5. Before → After Summary
+## 7. Before → After Summary
 
 ### Bird list row (dark mode)
 ```
@@ -276,7 +298,7 @@ Result: flat, indistinguishable     Result: perceptible hierarchy
 
 ---
 
-## 6. Implementation Priority
+## 8. Implementation Priority
 
 1. **Tokens** (tokens.css) — colors, shadows, typography weights. Highest impact, lowest risk.
 2. **Bird list rows** (search.css) — weight, size, spacing, hover/active states. Most-viewed component.
@@ -287,7 +309,7 @@ Result: flat, indistinguishable     Result: perceptible hierarchy
 
 ---
 
-## 7. Principles (Revised)
+## 9. Principles (Revised)
 
 The original "no-line rule" and "no shadows" philosophy created the flatness problem. Revised principles:
 
@@ -299,7 +321,7 @@ The original "no-line rule" and "no shadows" philosophy created the flatness pro
 
 ---
 
-## 8. Share Card System
+## 10. Share Card System
 
 ### Design Philosophy
 Minimal, premium, shareable. The card uses exactly **3 colors**: a near-black base, white text, and ONE accent color determined by rarity. No gradients, no textures, no ornate borders. The bird image is the hero; the typography is confident; the accent color is the personality.

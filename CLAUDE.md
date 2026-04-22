@@ -55,6 +55,10 @@ Configured via `convict` in `src/config.js`. Key vars: `PORT` (default 8888), `N
 - **Tokens:** `web/src/styles/tokens.css` — all colors, typography, spacing, shadows, transitions, grain texture
 - **Fonts:** Manrope (sans), Newsreader (serif/display), DM Mono (mono)
 - **Components use CSS custom properties, not utility classes** for colors/spacing. UnoCSS is used for icons (`i-ph-*`) and some layout utilities in templates.
+- **Two layout modes — this is a hard rule:**
+  - **Browse mode** (home, settings, any future list pages): `max-width: 720px`, centered, single-column. The bottom nav also caps at 720px. All browse pages must stay within this shell.
+  - **Detail mode** (bird detail page): `max-width: 1024px`, centered, two-column grid (image | info) on desktop. This wider shell is intentional — it's an immersive dossier experience distinct from the list view. Must not exceed 1024px; must not shrink to 720px (would make columns too narrow for a photo).
+  - Never introduce a page that breaks either constraint without documenting it here.
 - **Mobile-first:** bottom navigation bar (iOS-style) with Birds + Settings links — no inline dark-mode toggle. `TheHeader.vue` was removed; home page has an inline `.page-hero` header instead. Mobile detail page has organic overlap (intro panel slides over image with rounded top corners).
 - **Page transitions:** Vue `<Transition>` with fade + drift, respects `prefers-reduced-motion`
 - **IUCN status chips:** colored dot + code + label, pulse animation on critical statuses
