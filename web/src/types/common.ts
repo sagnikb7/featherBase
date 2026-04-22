@@ -36,7 +36,7 @@ export interface Meta {
 }
 
 export interface Image {
-  file: string
-  url: string
+  file: string | null
+  cdn: string | null
   tags: string[]
 }

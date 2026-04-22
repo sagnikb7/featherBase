@@ -19,7 +19,7 @@ const basicMiddleware = (app) => {
           imgSrc: [
             "'self'",
             'data:',
-            'https://cdn.download.ams.birds.cornell.edu',
+            'https://sagnikb7.github.io',
           ],
           connectSrc: ["'self'"],
           fontSrc: ["'self'", 'https:', 'data:'],

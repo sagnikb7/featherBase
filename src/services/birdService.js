@@ -13,7 +13,13 @@ const getBirdById = async (id) => {
   }
 
   const [metaData] = await metaModel.get({ serialNumber: id });
-  return { ...data, meta: { images: metaData?.images || [] } };
+  const CDN_BASE = 'https://sagnikb7.github.io/featherbase-images/assets/images/optimised_birds';
+  const images = (metaData?.images || []).map(({ file, tags }) => ({
+    file: file || null,
+    cdn: file ? `${CDN_BASE}/${file}` : null,
+    tags,
+  }));
+  return { ...data, meta: { images } };
 };
 
 const getAllBirds = async ({ page = 1, size = 10, search, family, group, order } = {}) => {

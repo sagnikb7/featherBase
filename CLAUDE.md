@@ -28,9 +28,9 @@ Configured via `convict` in `src/config.js`. Key vars: `PORT` (default 8888), `N
 - **API base path:** `/v1.0/birds` - routes defined in `src/routes/birdRouter.js`
 - **API search:** `GET /v1.0/birds?search=<term>` does case-insensitive regex on `name` and `scientificName`. The list endpoint returns `{ id, serialNumber, name, scientificName, commonGroup }` — no images (meta join skipped for performance).
 - **Frontend:** Vue 3 + Vite + UnoCSS app in `web/`, built output served as static files from `web/dist/`. Uses file-based routing (unplugin-vue-router), auto-imports (unplugin-auto-import), and Phosphor icons (@iconify-json/ph).
-- **Middleware chain** (in order): timeout (30s), Helmet (CSP whitelists Cornell CDN), body parsers, request logger, routes, 404 handler, error handler. Sentry was removed — re-add when needed.
+- **Middleware chain** (in order): timeout (30s), Helmet (CSP whitelists GitHub Pages CDN `sagnikb7.github.io`), body parsers, request logger, routes, 404 handler, error handler. Sentry was removed — re-add when needed.
 - **Data pipeline:** Bird data is generated via LLM prompts (see README), stored as JSON in `data/birds/`, and bulk-inserted via `src/scripts/insert-birds.js`
-- **Image delivery:** Dual mode via `VITE_IMG_DELIVERY_MODE` — `online` uses Cornell CDN URLs from MongoDB meta collection, `offline` serves from `public/images/birds/` (gitignored). Images are only loaded on the detail page, not the list.
+- **Image delivery:** Dual mode via `VITE_IMG_DELIVERY_MODE` — `online` constructs GitHub Pages CDN URLs from the `file` field in the meta collection (`https://sagnikb7.github.io/featherbase-images/assets/images/optimised_birds/<file>`), `offline` serves from `public/images/birds/` (gitignored). The API response exposes `cdn` (not `url`) on each image object; `cdn` is `null` if `file` is missing. Images are only loaded on the detail page, not the list.
 
 ## Deployment
 
@@ -74,7 +74,7 @@ Configured via `convict` in `src/config.js`. Key vars: `PORT` (default 8888), `N
 - **Dimensions:** 630×880 logical, rendered at 2× (1260×1760px). No rounded corners on card.
 - **Layout:** bird image fills 55% (cover crop), info section below. Serial pill bottom-left of image. Two-column metadata (right-aligned labels, left-aligned values).
 - **Rarity accent:** 5 tiers each get one accent color (`#7A8B7A` sage → `#FF6B35` coral). Higher tiers apply the accent to progressively more elements (serial → divider → name).
-- **Image loading:** tries proxy endpoint first (`/v1.0/birds/image-proxy?url=...`), falls back to direct URL.
+- **Image loading:** tries CDN URL directly first (GitHub Pages is CORS-permissive), falls back to `/v1.0/birds/image-proxy?url=...` (proxy allows `sagnikb7.github.io`).
 - **Sharing:** Web Share API with PNG file; falls back to `<a download>` if not supported.
 - **Dev tool:** `web/src/pages/test-cards.vue` — fetches one real bird per rarity tier from the API and bulk-generates/downloads all 5 cards. Route is present but commented out in `web/typed-router.d.ts` (dev-only, not linked in the UI).
 

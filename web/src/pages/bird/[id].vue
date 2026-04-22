@@ -42,7 +42,7 @@ const birdId = computed(() => currentBird.value?.serialNumber ?? routeBirdId.val
 const hasPrev = computed(() => Number.isInteger(birdId.value) && birdId.value > 1)
 
 function imageSrc(img: Image) {
-  return ONLINE_MODE ? img.url : `/images/birds/${img.file}`
+  return ONLINE_MODE ? (img.cdn ?? '') : `/images/birds/${img.file}`
 }
 
 function visibleTags(img: Image) {

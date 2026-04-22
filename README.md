@@ -42,7 +42,7 @@ Edit `run.dev.sh` with your `MONGO_DB` connection string. This file is gitignore
 | `PORT` | Server port | `8888` |
 | `MONGO_DB` | MongoDB connection string | — |
 | `DEBUG` | Verbose error stacks in responses | `false` |
-| `VITE_IMG_DELIVERY_MODE` | `online` (Cornell CDN) or `offline` (local `/public/images/birds`) | `online` |
+| `VITE_IMG_DELIVERY_MODE` | `online` (GitHub Pages CDN) or `offline` (local `/public/images/birds`) | `online` |
 
 ### 3. Run
 

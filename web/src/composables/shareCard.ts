@@ -139,7 +139,7 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
   ctx.fillRect(imgX, imgY, imgW, imgDrawH)
 
   if (imageUrl) {
-    for (const url of [`/v1.0/birds/image-proxy?url=${encodeURIComponent(imageUrl)}`, imageUrl]) {
+    for (const url of [imageUrl, `/v1.0/birds/image-proxy?url=${encodeURIComponent(imageUrl)}`]) {
       try {
         const img = await loadImg(url)
         const scale = Math.max(imgW / img.width, imgDrawH / img.height)

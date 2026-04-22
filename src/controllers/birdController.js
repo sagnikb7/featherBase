@@ -1,6 +1,6 @@
 import { getBirdById, getAllBirds, getGroups } from '#services/birdService.js';
 
-const ALLOWED_IMAGE_HOSTS = ['cdn.download.ams.birds.cornell.edu'];
+const ALLOWED_IMAGE_HOSTS = ['sagnikb7.github.io'];
 
 const getBirdsController = async (req, res, next) => {
   try {

@@ -14,7 +14,7 @@ function getImageUrl(bird: Bird): string {
   const img = bird.meta?.images?.[0]
   if (!img)
     return ''
-  return ONLINE_MODE ? img.url : `/images/birds/${img.file}`
+  return ONLINE_MODE ? (img.cdn ?? '') : `/images/birds/${img.file}`
 }
 
 async function fetchBirdById(id: number): Promise<Bird | null> {
