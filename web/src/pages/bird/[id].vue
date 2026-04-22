@@ -7,7 +7,7 @@ const route = useRoute()
 const router = useRouter()
 const birdId = ref(Number.parseInt(route.params.id as string))
 
-const ONLINE_MODE = import.meta.env.VITE_IMG_DELIVERY_MODE === 'online'
+const ONLINE_MODE = import.meta.env.VITE_IMG_DELIVERY_MODE !== 'offline'
 
 const currentBird = ref<Bird | undefined>()
 const images = ref<Image[]>([])
