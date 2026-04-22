@@ -607,17 +607,9 @@
     margin: 0 auto var(--space-5);
   }
 
-  .search-dropdown {
-    position: fixed;
-    top: auto;
-    bottom: 60px;
-    left: var(--space-4);
-    right: var(--space-4);
-    max-height: 45vh;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  }
-
   .botd-card {
+    margin-left: var(--space-4);
+    margin-right: var(--space-4);
     margin-bottom: var(--space-5);
   }
 

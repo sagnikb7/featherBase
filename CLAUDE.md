@@ -63,7 +63,7 @@ Configured via `convict` in `src/config.js`. Key vars: `PORT` (default 8888), `N
 - **Page transitions:** Vue `<Transition>` with fade + drift, respects `prefers-reduced-motion`
 - **IUCN status chips:** colored dot + code + label, pulse animation on critical statuses
 - **Group color hashing:** `web/src/composables/groupColor.ts` — deterministic djb2 hash maps `commonGroup` names to a 10-color earthy palette. Same color on list and detail pages.
-- **Home page:** inline hero header (logo + title + tagline), bird-of-the-day card (seeded by `Math.floor(Date.now() / 86400000) % total`), compact Pokédex-style rows (no images), API-powered search with debounced dropdown (300ms, 3+ chars), group filter chips (up to 8, seeded-shuffled daily so they rotate without being random per visit)
+- **Home page:** inline hero header (logo + title + tagline), bird-of-the-day card (seeded by `Math.floor(Date.now() / 86400000) % total`), compact Pokédex-style rows (no images), API-powered search with debounced dropdown (300ms, 3+ chars), group filter chips (up to 8, seeded-shuffled daily so they rotate without being random per visit). Search dropdown is `position: absolute` on all screen sizes — no mobile bottom-sheet override.
 - **Serial format:** `formatSerial()` in `web/src/composables/format.ts` — 4-digit zero-padded (`#0001`, not `#001`)
 - **Detail page:** image carousel with swipe support, dot indicators, image tags (adult/juvenile/male/female — "default" tag hidden). Prev/next bird navigation is in the intro panel, not on the image. Share button is a full-width `.bird-share-cta` CTA below the identity block (not inline in the nav row). Loader is animated dots, not the feather SVG.
 - **Panel backgrounds:** accent-tinted (5% forest green in light, 6% mint in dark) with `--surface-gradient` overlay and a 2px accent-derived top border — branded surface, not generic gray.
@@ -80,8 +80,9 @@ Configured via `convict` in `src/config.js`. Key vars: `PORT` (default 8888), `N
 
 ### Settings page
 - Route: `/settings` — `web/src/pages/settings.vue`
-- Sections: Appearance (theme picker), "Spread the Word" unlock card, About (app info + GitHub link)
+- Sections: Appearance (theme picker), "Spread the Word" unlock card (hidden once midnight is unlocked), Storage (clear cache), About (app info + GitHub link)
 - Theme picker: 3-column grid for light/dark/auto; midnight is a full-width special row with shimmer animation (`.theme-option--midnight`), hidden until unlocked
+- **Clear Cache button** (Storage section): deletes all Cache Storage entries, unregisters the service worker, then reloads — re-registers the SW fresh. Amber-toned, uses the spread-card pattern. Copy is intentionally non-technical ("Something feel off? A fresh start usually fixes it.")
 - Styles: `web/src/styles/components/settings.css`
 
 ### Rarity system

@@ -13,6 +13,23 @@ const midnightOption = { value: 'midnight' as Theme, label: 'Midnight', descript
 const spreading = ref(false)
 const spreadResult = ref<'idle' | 'pending' | 'success' | 'error'>('idle')
 
+const clearing = ref(false)
+
+async function clearCache() {
+  if (clearing.value) return
+  clearing.value = true
+  try {
+    const keys = await caches.keys()
+    await Promise.all(keys.map(k => caches.delete(k)))
+    const registrations = await navigator.serviceWorker.getRegistrations()
+    await Promise.all(registrations.map(r => r.unregister()))
+    window.location.reload()
+  }
+  catch {
+    clearing.value = false
+  }
+}
+
 function confirmShare() {
   unlockMidnight()
   fireUnlockConfetti()
@@ -148,6 +165,34 @@ async function spreadTheWord() {
           >
             <div i-ph-paper-plane-tilt class="spread-btn-icon" />
             {{ spreading ? 'Generating card…' : 'Share Today\'s Bird' }}
+          </button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2 class="settings-section-title">
+          <div i-ph-hard-drives-duotone class="settings-section-icon" />
+          Storage
+        </h2>
+        <div class="spread-card">
+          <div class="spread-card-body">
+            <div class="spread-icon-wrap cache-icon-wrap" aria-hidden="true">
+              <div i-ph-broom-duotone class="spread-icon cache-icon" />
+            </div>
+            <div class="spread-text">
+              <p class="spread-title">Clear Cache</p>
+              <p class="spread-desc">
+                Something feel off? A fresh start usually fixes it.
+              </p>
+            </div>
+          </div>
+          <button
+            class="spread-btn cache-btn"
+            :disabled="clearing"
+            @click="clearCache"
+          >
+            <div i-ph-arrows-clockwise class="spread-btn-icon" :class="{ 'cache-btn-spinning': clearing }" />
+            {{ clearing ? 'Clearing…' : 'Clear Cache & Refresh' }}
           </button>
         </div>
       </section>

@@ -393,6 +393,32 @@
   animation: spread-success-in 0.25s ease both;
 }
 
+/* ── Cache clear button ── */
+.cache-icon-wrap {
+  background: rgba(180, 120, 60, 0.1);
+}
+
+.cache-icon {
+  color: #b47a3c;
+}
+
+.cache-btn {
+  color: #b47a3c;
+  border-top-color: rgba(180, 120, 60, 0.15);
+}
+
+.cache-btn:hover:not(:disabled) {
+  background: rgba(180, 120, 60, 0.07);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.cache-btn-spinning {
+  animation: spin 0.8s linear infinite;
+}
+
 /* ── Made with love footer ── */
 .settings-made-with {
   text-align: center;
