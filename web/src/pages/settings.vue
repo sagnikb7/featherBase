@@ -156,7 +156,7 @@ async function spreadTheWord() {
           </div>
           <div class="settings-row">
             <span class="settings-row-label">Data source</span>
-            <span class="settings-row-value">Field guides &amp; surveys</span>
+            <span class="settings-row-value">LLMs &amp; eBird</span>
           </div>
           <a
             href="https://github.com/sagnikb7/featherBase"
