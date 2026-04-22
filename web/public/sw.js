@@ -1,4 +1,4 @@
-const CACHE_NAME = 'featherbase-v1';
+const CACHE_NAME = 'featherbase-v2';
 
 const PRECACHE = [
   '/',
@@ -30,8 +30,19 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   if (request.method !== 'GET') return;
+  if (url.origin !== self.location.origin) return;
 
   if (url.pathname.startsWith('/v1.0/') || url.pathname === '/_health') {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  if (request.mode === 'navigate') {
     event.respondWith(networkFirst(request));
     return;
   }
@@ -45,9 +56,12 @@ async function cacheFirst(request) {
 
   try {
     const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
+    if (response.ok && response.status === 200) {
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('text/html')) {
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, response.clone());
+      }
     }
     return response;
   } catch {
