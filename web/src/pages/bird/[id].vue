@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Bird, Image, SingleBirdResponse } from '~/types/common'
-import { baseUrl, groupColor, useIucnStatus } from '~/composables'
+import { baseUrl, groupColor, shareBirdCard, useIucnStatus } from '~/composables'
 import BirdImage from '~/components/BirdImage.vue'
 
 const route = useRoute()
@@ -15,6 +15,23 @@ const activeImage = ref(0)
 const loading = ref(true)
 
 const { iucnStatus, iucnStatusLabel, iucnStatusExplanation, iucnChipClass } = useIucnStatus(currentBird)
+const sharing = ref(false)
+
+const currentImageUrl = computed(() => {
+  const img = images.value[activeImage.value]
+  return img ? imageSrc(img) : ''
+})
+
+async function share() {
+  if (!currentBird.value || sharing.value) return
+  sharing.value = true
+  try {
+    await shareBirdCard(currentBird.value, currentImageUrl.value)
+  }
+  finally {
+    sharing.value = false
+  }
+}
 
 const hasPrev = computed(() => birdId.value > 1)
 const hasNext = computed(() => !!currentBird.value)
@@ -90,7 +107,12 @@ getBirdData(birdId.value)
 </script>
 
 <template>
-  <div v-if="currentBird" class="bird-detail">
+  <div v-if="loading" class="detail-loader">
+    <div class="loader" role="status">
+      <img src="/favicon.svg" alt="" class="loader-feather" />
+    </div>
+  </div>
+  <div v-else-if="currentBird" class="bird-detail">
     <div
       class="bird-detail-image"
       @touchstart.passive="onTouchStart"
@@ -161,15 +183,25 @@ getBirdData(birdId.value)
         <span class="bird-serial">
           #{{ String(currentBird.serialNumber).padStart(3, '0') }}
         </span>
-        <button
-          class="bird-nav-btn"
-          :disabled="!hasNext"
-          aria-label="Next bird"
-          @click="navigate(birdId + 1)"
-        >
-          <span>Next</span>
-          <div i-ph-caret-right />
-        </button>
+        <div class="bird-nav-actions">
+          <button
+            class="bird-nav-btn"
+            :disabled="sharing"
+            aria-label="Share bird card"
+            @click="share"
+          >
+            <div i-ph-share-network />
+          </button>
+          <button
+            class="bird-nav-btn"
+            :disabled="!hasNext"
+            aria-label="Next bird"
+            @click="navigate(birdId + 1)"
+          >
+            <span>Next</span>
+            <div i-ph-caret-right />
+          </button>
+        </div>
       </div>
 
       <div class="bird-identity">

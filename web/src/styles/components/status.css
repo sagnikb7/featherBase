@@ -1,5 +1,5 @@
 /* ──────────────────────────────────────────
-   Status indicators: loading, error
+   Status indicators: loader, error
    ────────────────────────────────────────── */
 
 .status-box {
@@ -9,12 +9,44 @@
   font-size: var(--text-sm);
 }
 
-.loading {
-  background-color: var(--color-accent-light);
-  color: var(--color-accent);
-}
-
 .error {
   background-color: var(--color-danger-light);
   color: var(--color-danger-text);
+}
+
+/* ── Feather loader ── */
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) 0;
+  gap: var(--space-4);
+}
+
+.loader-feather {
+  width: 32px;
+  height: 32px;
+  opacity: 0.5;
+  animation: loader-drift 1.8s ease-in-out infinite;
+}
+
+.loader-text {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  letter-spacing: 0.04em;
+}
+
+@keyframes loader-drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+  50% { transform: translateY(-6px) rotate(3deg); opacity: 0.7; }
+}
+
+/* ── Detail page loading skeleton ── */
+.detail-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 56px);
 }

@@ -141,6 +141,12 @@
   margin: 0;
 }
 
+.bird-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
 .bird-nav-btn {
   display: flex;
   align-items: center;

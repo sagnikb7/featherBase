@@ -217,8 +217,9 @@ fetchBirds()
         </option>
       </select>
     </div>
-    <div v-if="loading" class="status-box loading" role="status">
-      Loading birds...
+    <div v-if="loading" class="loader" role="status">
+      <img src="/favicon.svg" alt="" class="loader-feather" />
+      <span class="loader-text">Loading birds</span>
     </div>
     <div v-if="error" class="status-box error" role="alert">
       {{ error }}

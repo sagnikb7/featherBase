@@ -1,6 +1,7 @@
 export * from './dark'
 export * from './groupColor'
 export * from './iucn'
+export * from './shareCard'
 
 // In dev, Vite proxy forwards /v1.0/* to the backend.
 // In prod, Express serves everything from the same origin.
