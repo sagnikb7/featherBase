@@ -351,6 +351,16 @@
   cursor: default;
 }
 
+.spread-btn--confirm {
+  background: rgba(167, 139, 250, 0.08);
+  color: #a78bfa;
+  border-top-color: rgba(167, 139, 250, 0.2);
+}
+
+.spread-btn--confirm:hover {
+  background: rgba(167, 139, 250, 0.15);
+}
+
 .spread-btn-icon {
   font-size: 16px;
 }

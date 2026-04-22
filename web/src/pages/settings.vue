@@ -11,7 +11,13 @@ const themeOptions: { value: Theme; label: string; description: string; icon: st
 const midnightOption = { value: 'midnight' as Theme, label: 'Midnight', description: 'Deep violet night', icon: 'i-ph-shooting-star-duotone' }
 
 const spreading = ref(false)
-const spreadResult = ref<'idle' | 'success' | 'error'>('idle')
+const spreadResult = ref<'idle' | 'pending' | 'success' | 'error'>('idle')
+
+function confirmShare() {
+  unlockMidnight()
+  fireUnlockConfetti()
+  spreadResult.value = 'success'
+}
 
 async function spreadTheWord() {
   if (spreading.value) return
@@ -31,9 +37,7 @@ async function spreadTheWord() {
       const bird = birdData.data
       const imgUrl = bird.meta?.images?.[0]?.cdn ?? ''
       await shareBirdCard(bird, imgUrl)
-      unlockMidnight()
-      fireUnlockConfetti()
-      spreadResult.value = 'success'
+      spreadResult.value = 'pending'
     }
     else {
       spreadResult.value = 'error'
@@ -128,6 +132,14 @@ async function spreadTheWord() {
             <div i-ph-shooting-star-duotone class="spread-success-icon" />
             <span>Midnight theme unlocked</span>
           </div>
+          <button
+            v-else-if="spreadResult === 'pending'"
+            class="spread-btn spread-btn--confirm"
+            @click="confirmShare"
+          >
+            <div i-ph-check-circle class="spread-btn-icon" />
+            Did you share it? Tap to unlock
+          </button>
           <button
             v-else
             class="spread-btn"
