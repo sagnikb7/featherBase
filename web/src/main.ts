@@ -13,4 +13,4 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
 })
 app.use(router)
-app.mount('#app')
+router.isReady().then(() => app.mount('#app'))

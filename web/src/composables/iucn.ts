@@ -1,6 +1,6 @@
 import type { Bird, IUCNStatus } from '~/types/common'
 
-const STATUS_META: Record<IUCNStatus, { label: string; explanation: string }> = {
+const STATUS_META: Record<IUCNStatus, { label: string, explanation: string }> = {
   EX: {
     label: 'Extinct',
     explanation: 'Extinct (EX): No known living individuals remain. The species has been lost permanently.',
@@ -37,7 +37,9 @@ export function useIucnStatus(bird: Ref<Bird | undefined>) {
   })
 
   const iucnStatusLabel = computed(() => {
-    if (!iucnStatus.value) return ''
+    if (!iucnStatus.value)
+      return ''
+
     return STATUS_META[iucnStatus.value]?.label || ''
   })
 
@@ -49,7 +51,9 @@ export function useIucnStatus(bird: Ref<Bird | undefined>) {
   })
 
   const iucnChipClass = computed(() => {
-    if (!iucnStatus.value) return 'iucn-chip--unknown'
+    if (!iucnStatus.value)
+      return 'iucn-chip--unknown'
+
     return `iucn-chip--${iucnStatus.value.toLowerCase()}`
   })
 

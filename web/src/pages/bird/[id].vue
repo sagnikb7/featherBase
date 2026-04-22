@@ -5,7 +5,10 @@ import BirdImage from '~/components/BirdImage.vue'
 
 const route = useRoute()
 const router = useRouter()
-const birdId = ref(Number.parseInt(route.params.id as string))
+const routeBirdId = computed(() => {
+  const match = route.path.match(/^\/bird\/(\d+)$/)
+  return match ? Number.parseInt(match[1], 10) : Number.NaN
+})
 
 const ONLINE_MODE = import.meta.env.VITE_IMG_DELIVERY_MODE !== 'offline'
 
@@ -23,7 +26,9 @@ const currentImageUrl = computed(() => {
 })
 
 async function share() {
-  if (!currentBird.value || sharing.value) return
+  if (!currentBird.value || sharing.value)
+    return
+
   sharing.value = true
   try {
     await shareBirdCard(currentBird.value, currentImageUrl.value)
@@ -33,8 +38,8 @@ async function share() {
   }
 }
 
-const hasPrev = computed(() => birdId.value > 1)
-const hasNext = computed(() => !!currentBird.value)
+const birdId = computed(() => currentBird.value?.serialNumber ?? routeBirdId.value)
+const hasPrev = computed(() => Number.isInteger(birdId.value) && birdId.value > 1)
 
 function imageSrc(img: Image) {
   return ONLINE_MODE ? img.url : `/images/birds/${img.file}`
@@ -45,6 +50,13 @@ function visibleTags(img: Image) {
 }
 
 async function getBirdData(id: number) {
+  if (!Number.isInteger(id) || id < 1) {
+    currentBird.value = undefined
+    images.value = []
+    loading.value = false
+    return false
+  }
+
   loading.value = true
   activeImage.value = 0
   try {
@@ -55,33 +67,38 @@ async function getBirdData(id: number) {
     if (res?.data?.name) {
       currentBird.value = res.data
       images.value = res.data.meta?.images || []
+      return true
     }
-    else {
-      currentBird.value = undefined
-      images.value = []
-    }
+
+    currentBird.value = undefined
+    images.value = []
+    return false
   }
   catch {
     currentBird.value = undefined
     images.value = []
+    return false
   }
   finally {
     loading.value = false
   }
 }
 
-function navigate(id: number) {
-  birdId.value = id
-  router.replace(`/bird/${id}`)
-  getBirdData(id)
+async function navigate(id: number) {
+  if (id < 1)
+    return
+
+  await router.push(`/bird/${id}`)
 }
 
 function prevImage() {
-  if (activeImage.value > 0) activeImage.value--
+  if (activeImage.value > 0)
+    activeImage.value--
 }
 
 function nextImage() {
-  if (activeImage.value < images.value.length - 1) activeImage.value++
+  if (activeImage.value < images.value.length - 1)
+    activeImage.value++
 }
 
 let touchStartX = 0
@@ -90,26 +107,37 @@ function onTouchStart(e: TouchEvent) {
 }
 function onTouchEnd(e: TouchEvent) {
   const dx = e.changedTouches[0].clientX - touchStartX
-  if (Math.abs(dx) < 40) return
-  if (dx < 0) nextImage()
-  else prevImage()
+  if (Math.abs(dx) < 40)
+    return
+  if (dx < 0)
+    nextImage()
+  else
+    prevImage()
 }
 
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'ArrowUp' && hasPrev.value) navigate(birdId.value - 1)
-  if (e.key === 'ArrowDown' && hasNext.value) navigate(birdId.value + 1)
+  if (e.key === 'ArrowUp' && hasPrev.value)
+    navigate(birdId.value - 1)
+  if (e.key === 'ArrowDown' && currentBird.value)
+    navigate(birdId.value + 1)
 }
 
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
-getBirdData(birdId.value)
+watch(
+  routeBirdId,
+  (id) => {
+    getBirdData(id)
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <div v-if="loading" class="detail-loader">
     <div class="loader" role="status">
-      <img src="/favicon.svg" alt="" class="loader-feather" />
+      <img src="/favicon.svg" alt="" class="loader-feather">
     </div>
   </div>
   <div v-else-if="currentBird" class="bird-detail">
@@ -194,7 +222,7 @@ getBirdData(birdId.value)
           </button>
           <button
             class="bird-nav-btn"
-            :disabled="!hasNext"
+            :disabled="!currentBird"
             aria-label="Next bird"
             @click="navigate(birdId + 1)"
           >
@@ -208,7 +236,9 @@ getBirdData(birdId.value)
         <h1 class="bird-name">
           {{ currentBird.name }}
         </h1>
-        <p class="bird-scientific">{{ currentBird.scientificName }}</p>
+        <p class="bird-scientific">
+          {{ currentBird.scientificName }}
+        </p>
       </div>
 
       <div class="bird-badges">
@@ -219,7 +249,8 @@ getBirdData(birdId.value)
         <span
           v-if="iucnStatus"
           :title="iucnStatusExplanation"
-          :class="['iucn-chip', iucnChipClass]"
+          class="iucn-chip"
+          :class="iucnChipClass"
         >
           <span class="iucn-dot" />
           <span class="iucn-code">{{ iucnStatus }}</span>
@@ -283,11 +314,24 @@ getBirdData(birdId.value)
     <div v-if="currentBird.diet?.length" class="bird-detail-panel">
       <p class="panel-title">
         <span i-ph-bowl-food class="panel-icon" />
-        Diet
+        <span>Diet</span>
       </p>
       <div class="tag-row">
         <span v-for="d in currentBird.diet" :key="d" class="detail-tag capitalize">{{ d }}</span>
       </div>
     </div>
+  </div>
+  <div v-else class="not-found">
+    <div i-ph-binoculars class="not-found-icon" />
+    <h1 class="not-found-title">
+      Bird not found
+    </h1>
+    <p class="not-found-text">
+      No species matched ID #{{ Number.isInteger(routeBirdId) ? routeBirdId : '???' }}.
+    </p>
+    <a href="/" class="not-found-link">
+      <span i-ph-arrow-left />
+      <span>Back to collection</span>
+    </a>
   </div>
 </template>

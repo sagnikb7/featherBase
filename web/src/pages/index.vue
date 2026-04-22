@@ -35,7 +35,8 @@ async function fetchGroups() {
 async function fetchBirds(page = 1) {
   const isFirstPage = page === 1
   try {
-    if (isFirstPage) loading.value = true
+    if (isFirstPage)
+      loading.value = true
     else loadingMore.value = true
     error.value = null
 
@@ -94,7 +95,9 @@ async function searchBirds(query: string) {
 }
 
 function onSearchInput() {
-  if (searchTimer) clearTimeout(searchTimer)
+  if (searchTimer)
+    clearTimeout(searchTimer)
+
   if (searchQuery.value.length < 3) {
     searchResults.value = []
     showDropdown.value = false
@@ -110,7 +113,9 @@ function clearSearch() {
 }
 
 function dismissDropdown() {
-  setTimeout(() => { showDropdown.value = false }, 150)
+  setTimeout(() => {
+    showDropdown.value = false
+  }, 150)
 }
 
 function onGroupChange() {
@@ -122,13 +127,15 @@ function onGroupChange() {
 function loadMore() {
   if (loadingMore.value || !hasNext.value)
     return
+
   fetchBirds(currentPage.value + 1)
 }
 
 const sentinel = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
 
 onMounted(() => {
-  const observer = new IntersectionObserver(
+  observer = new IntersectionObserver(
     (entries) => {
       if (entries[0].isIntersecting)
         loadMore()
@@ -136,15 +143,22 @@ onMounted(() => {
     { rootMargin: '200px' },
   )
 
-  watch(sentinel, (el) => {
-    if (el) observer.observe(el)
-  }, { immediate: true })
+  fetchGroups()
+  fetchBirds()
 
-  onUnmounted(() => observer.disconnect())
+  watch(sentinel, (el, previousEl) => {
+    if (previousEl)
+      observer?.unobserve(previousEl)
+    if (el)
+      observer?.observe(el)
+  }, { immediate: true })
 })
 
-fetchGroups()
-fetchBirds()
+onUnmounted(() => {
+  if (searchTimer)
+    clearTimeout(searchTimer)
+  observer?.disconnect()
+})
 </script>
 
 <template>
@@ -218,7 +232,7 @@ fetchBirds()
       </select>
     </div>
     <div v-if="loading" class="loader" role="status">
-      <img src="/favicon.svg" alt="" class="loader-feather" />
+      <img src="/favicon.svg" alt="" class="loader-feather">
       <span class="loader-text">Loading birds</span>
     </div>
     <div v-if="error" class="status-box error" role="alert">

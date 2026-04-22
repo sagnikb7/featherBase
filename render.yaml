@@ -1,0 +1,23 @@
+version: "1"
+services:
+  - type: web
+    name: featherBase
+    runtime: node
+    repo: https://github.com/sagnikb7/featherBase
+    plan: free
+    region: singapore
+    buildCommand: npx pnpm@latest install && npm run build:FE
+    startCommand: node index.js
+    autoDeployTrigger: commit
+    healthCheckPath: /_health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_DB
+        sync: false
+      - key: VITE_IMG_DELIVERY_MODE
+        value: online
+      - key: SERVICE_NAME
+        value: feather-base

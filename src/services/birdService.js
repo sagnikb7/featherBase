@@ -8,6 +8,10 @@ const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const getBirdById = async (id) => {
   const [data] = await birdModel.get({ serialNumber: id });
+  if (!data) {
+    return null;
+  }
+
   const [metaData] = await metaModel.get({ serialNumber: id });
   return { ...data, meta: { images: metaData?.images || [] } };
 };

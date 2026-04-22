@@ -1,282 +1,279 @@
-import type { Bird } from '~/types/common'
 import { groupColor } from './groupColor'
 import { getRarity } from './rarity'
+import type { Bird } from '~/types/common'
 
 const APP_URL = 'featherbase.netlify.app'
-const CARD_W = 720
-const CARD_H = 1280
 
-const IUCN_COLORS: Record<string, string> = {
-  LC: '#4a7c3f', NT: '#8a7a2a', VU: '#c47a1a',
-  EN: '#c4501a', CR: '#a63d2f', EW: '#5c3a4a', EX: '#2c2c2c',
+const W = 630
+const H = 880
+const S = 2
+const PAD = 28
+const FRAME = 4
+
+const BASE = '#0C0C0C'
+const SURFACE = '#131313'
+const WHITE = '#F2F2F2'
+const GREY = '#999999'
+const GREY_DIM = '#505050'
+const DIVIDER_DEFAULT = 'rgba(255, 255, 255, 0.07)'
+
+const IUCN_MAP: Record<string, { color: string, label: string }> = {
+  LC: { color: '#5a9a4f', label: 'Least Concern' },
+  NT: { color: '#9a8a3a', label: 'Near Threatened' },
+  VU: { color: '#d48a2a', label: 'Vulnerable' },
+  EN: { color: '#d45a2a', label: 'Endangered' },
+  CR: { color: '#b8402f', label: 'Critically Endangered' },
+  EW: { color: '#6c4a5a', label: 'Extinct in Wild' },
+  EX: { color: '#4a4a4a', label: 'Extinct' },
 }
 
-const IUCN_LABELS: Record<string, string> = {
-  LC: 'Least Concern', NT: 'Near Threatened', VU: 'Vulnerable',
-  EN: 'Endangered', CR: 'Critically Endangered', EW: 'Extinct in Wild', EX: 'Extinct',
+interface Tier {
+  accent: string
+  frameW: number
+  topBar: number
+  accentSerial: boolean
+  accentDivider: boolean
+  accentName: boolean
 }
 
-const RARITY_ACCENTS: Record<number, { border: string; glow: string }> = {
-  1: { border: '#8aaa8a', glow: '' },
-  2: { border: '#6aaaba', glow: '' },
-  3: { border: '#9a7abe', glow: 'rgba(154, 122, 190, 0.25)' },
-  4: { border: '#d4b44a', glow: 'rgba(212, 180, 74, 0.3)' },
-  5: { border: '#e09050', glow: 'rgba(224, 144, 80, 0.35)' },
+const TIERS: Record<number, Tier> = {
+  1: { accent: '#7A8B7A', frameW: 1.5, topBar: 0, accentSerial: false, accentDivider: false, accentName: false },
+  2: { accent: '#4ECDC4', frameW: 2, topBar: 4, accentSerial: false, accentDivider: false, accentName: false },
+  3: { accent: '#7C5CFC', frameW: 2.5, topBar: 5, accentSerial: true, accentDivider: false, accentName: false },
+  4: { accent: '#FFB800', frameW: 3, topBar: 6, accentSerial: true, accentDivider: true, accentName: false },
+  5: { accent: '#FF6B35', frameW: 3.5, topBar: 8, accentSerial: true, accentDivider: true, accentName: true },
 }
 
-interface Theme {
-  bg: string
-  bg2: string
-  surface: string
-  text: string
-  textMuted: string
-  textFaint: string
-  divider: string
-}
-
-const LIGHT: Theme = {
-  bg: '#fcf9f5',
-  bg2: '#f6f3ef',
-  surface: '#f0ece6',
-  text: '#1c1c19',
-  textMuted: '#44544e',
-  textFaint: '#6d7a74',
-  divider: 'rgba(193, 200, 196, 0.3)',
-}
-
-const DARK: Theme = {
-  bg: '#0d1512',
-  bg2: '#141e1a',
-  surface: '#1a2824',
-  text: '#e1e3de',
-  textMuted: '#8a9b94',
-  textFaint: '#5e6f68',
-  divider: 'rgba(134, 212, 190, 0.1)',
-}
-
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-  ctx.beginPath()
-  ctx.moveTo(x + r, y)
-  ctx.arcTo(x + w, y, x + w, y + h, r)
-  ctx.arcTo(x + w, y + h, x, y + h, r)
-  ctx.arcTo(x, y + h, x, y, r)
-  ctx.arcTo(x, y, x + w, y, r)
-  ctx.closePath()
-}
-
-function loadImage(src: string): Promise<HTMLImageElement> {
+function loadImg(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    const img = new window.Image()
+    const img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = () => resolve(img)
-    img.onerror = () => reject(new Error('Image load failed'))
+    img.onerror = () => reject(new Error('fail'))
     img.src = src
   })
 }
 
-function drawGrain(ctx: CanvasRenderingContext2D, w: number, h: number, alpha: number) {
-  ctx.globalAlpha = alpha
-  for (let i = 0; i < 6000; i++) {
-    ctx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'
-    ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1)
-  }
-  ctx.globalAlpha = 1
-}
-
-function drawChip(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, bg: string, fg: string, font = '600 14px sans-serif'): number {
-  ctx.font = font
-  const w = ctx.measureText(text).width + 18
-  roundRect(ctx, x, y, w, 26, 13)
+function chip(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, bg: string, fg: string): number {
+  ctx.font = '600 12px Manrope, sans-serif'
+  const w = ctx.measureText(text).width + 16
+  const h = 22
+  ctx.beginPath()
+  ctx.roundRect(x, y, w, h, 11)
   ctx.fillStyle = bg
   ctx.fill()
   ctx.fillStyle = fg
-  ctx.fillText(text, x + 9, y + 17)
+  ctx.textBaseline = 'middle'
+  ctx.fillText(text, x + 8, y + h / 2)
   return w
 }
 
+function ellipsis(ctx: CanvasRenderingContext2D, text: string, max: number): string {
+  if (ctx.measureText(text).width <= max)
+    return text
+  let t = text
+  while (t.length > 0 && ctx.measureText(`${t}…`).width > max)
+    t = t.slice(0, -1)
+  return `${t}…`
+}
+
 export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> {
-  const isDark = document.documentElement.classList.contains('dark')
-  const t = isDark ? DARK : LIGHT
   const rarity = bird.rarity || 1
   const rarityInfo = getRarity(rarity)
-  const accent = RARITY_ACCENTS[rarity] || RARITY_ACCENTS[1]
+  const tier = TIERS[rarity] || TIERS[1]
+  const gc = groupColor(bird.commonGroup)
+
+  // Build metadata lines
+  const meta: [string, string][] = []
+  if (bird.habitat?.length)
+    meta.push(['Habitat', bird.habitat.join(', ')])
+  if (bird.size)
+    meta.push(['Size', `${bird.size}${bird.sizeRange ? ` · ${bird.sizeRange}` : ''}`])
+  if (bird.diet?.length)
+    meta.push(['Diet', bird.diet.join(', ')])
+  if (bird.bestSeenAt)
+    meta.push(['Best seen at', bird.bestSeenAt])
+
+  const nameSize = bird.name.length > 20 ? 28 : 36
+  const metaLineH = 26
+
+  // Image capped at 55%, info gets the rest
+  const imgH = Math.round(H * 0.55)
+  const infoY = FRAME + imgH
 
   const canvas = document.createElement('canvas')
-  canvas.width = CARD_W
-  canvas.height = CARD_H
+  canvas.width = W * S
+  canvas.height = H * S
   const ctx = canvas.getContext('2d')!
+  ctx.scale(S, S)
 
-  // Card background
-  roundRect(ctx, 0, 0, CARD_W, CARD_H, 32)
-  ctx.fillStyle = t.bg
-  ctx.fill()
-  ctx.clip()
+  // ── Fill base (no radius — sharp card) ──
+  ctx.fillStyle = BASE
+  ctx.fillRect(0, 0, W, H)
 
-  drawGrain(ctx, CARD_W, CARD_H, isDark ? 0.02 : 0.015)
+  // ── Info surface ──
+  ctx.fillStyle = SURFACE
+  ctx.fillRect(0, infoY, W, H - infoY)
 
-  // Rarity border
-  const bp = 8
-  roundRect(ctx, bp, bp, CARD_W - bp * 2, CARD_H - bp * 2, 26)
-  ctx.strokeStyle = accent.border
-  ctx.lineWidth = rarity >= 4 ? 3 : rarity >= 3 ? 2.5 : 1.5
-  ctx.stroke()
-
-  if (accent.glow) {
-    ctx.shadowColor = accent.glow
-    ctx.shadowBlur = 20
-    ctx.stroke()
-    ctx.shadowColor = 'transparent'
-    ctx.shadowBlur = 0
+  // ── Bottom accent glow ──
+  if (rarity >= 2) {
+    const glowH = 60 + (rarity - 2) * 20
+    const glow = ctx.createLinearGradient(0, H - glowH, 0, H)
+    glow.addColorStop(0, 'transparent')
+    glow.addColorStop(1, `${tier.accent}${Math.round((0.03 + (rarity - 2) * 0.015) * 255).toString(16).padStart(2, '0')}`)
+    ctx.fillStyle = glow
+    ctx.fillRect(0, H - glowH, W, glowH)
   }
 
-  // Layout constants
-  const pad = 36
-  const imgY = pad
-  const imgW = CARD_W - pad * 2
-  const imgH = 500
-  const infoX = pad + 8
-  const contentW = CARD_W - pad * 2 - 16
+  // ── Image ──
+  const imgX = FRAME
+  const imgY = FRAME
+  const imgW = W - FRAME * 2
+  const imgDrawH = imgH
 
-  // Image area
   ctx.save()
-  roundRect(ctx, pad, imgY, imgW, imgH, 18)
+  ctx.beginPath()
+  ctx.rect(imgX, imgY, imgW, imgDrawH)
   ctx.clip()
-  ctx.fillStyle = t.surface
-  ctx.fillRect(pad, imgY, imgW, imgH)
+  ctx.fillStyle = '#151515'
+  ctx.fillRect(imgX, imgY, imgW, imgDrawH)
 
-  let hasImage = false
   if (imageUrl) {
-    try {
-      const proxyUrl = `/v1.0/birds/image-proxy?url=${encodeURIComponent(imageUrl)}`
-      const img = await loadImage(proxyUrl)
-      const scale = Math.max(imgW / img.width, imgH / img.height)
-      const sw = img.width * scale
-      const sh = img.height * scale
-      ctx.drawImage(img, pad + (imgW - sw) / 2, imgY + (imgH - sh) / 2, sw, sh)
-      hasImage = true
-    }
-    catch {
+    for (const url of [`/v1.0/birds/image-proxy?url=${encodeURIComponent(imageUrl)}`, imageUrl]) {
       try {
-        const img = await loadImage(imageUrl)
-        const scale = Math.max(imgW / img.width, imgH / img.height)
+        const img = await loadImg(url)
+        const scale = Math.max(imgW / img.width, imgDrawH / img.height)
         const sw = img.width * scale
         const sh = img.height * scale
-        ctx.drawImage(img, pad + (imgW - sw) / 2, imgY + (imgH - sh) / 2, sw, sh)
-        hasImage = true
+        ctx.drawImage(img, imgX + (imgW - sw) / 2, imgY + (imgDrawH - sh) / 2, sw, sh)
+        break
       }
-      catch { /* both failed */ }
+      catch { /* next */ }
     }
   }
-
-  if (!hasImage) {
-    ctx.fillStyle = isDark ? 'rgba(134, 212, 190, 0.06)' : 'rgba(2, 36, 29, 0.04)'
-    ctx.font = '140px serif'
+  else {
+    ctx.font = '100px serif'
     ctx.textAlign = 'center'
-    ctx.fillText('🪶', CARD_W / 2, imgY + imgH / 2 + 50)
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = 'rgba(255,255,255,0.04)'
+    ctx.fillText('🪶', W / 2, imgY + imgDrawH / 2)
   }
+
+  // Bottom gradient on image
+  const grad = ctx.createLinearGradient(0, imgY + imgDrawH - 90, 0, imgY + imgDrawH)
+  grad.addColorStop(0, 'transparent')
+  grad.addColorStop(1, 'rgba(0,0,0,0.45)')
+  ctx.fillStyle = grad
+  ctx.fillRect(imgX, imgY, imgW, imgDrawH)
+
+  // Serial pill — bottom-left of image
+  const serial = `#${String(bird.serialNumber).padStart(3, '0')}`
+  ctx.font = '700 13px "DM Mono", monospace'
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
+  const serialW = ctx.measureText(serial).width + 14
+  ctx.beginPath()
+  ctx.roundRect(imgX + 12, imgY + imgDrawH - 36, serialW, 24, 4)
+  ctx.fillStyle = 'rgba(0,0,0,0.6)'
+  ctx.fill()
+  ctx.fillStyle = tier.accentSerial ? tier.accent : '#ccc'
+  ctx.fillText(serial, imgX + 19, imgY + imgDrawH - 19)
+
   ctx.restore()
 
-  // Overlays on image
-  const serial = `#${String(bird.serialNumber).padStart(3, '0')}`
-  ctx.font = '700 14px monospace'
-  const serialW = ctx.measureText(serial).width + 16
-  const pillBg = isDark ? 'rgba(0, 0, 0, 0.55)' : 'rgba(255, 255, 255, 0.82)'
-  roundRect(ctx, pad + 12, imgY + 12, serialW, 28, 14)
-  ctx.fillStyle = pillBg
-  ctx.fill()
-  ctx.fillStyle = t.textMuted
-  ctx.textAlign = 'left'
-  ctx.fillText(serial, pad + 20, imgY + 31)
-
-  const badgeText = `★ ${rarityInfo.label}`
-  ctx.font = 'bold 14px sans-serif'
-  const badgeW = ctx.measureText(badgeText).width + 18
-  roundRect(ctx, CARD_W - pad - badgeW - 12, imgY + 12, badgeW, 28, 14)
-  ctx.fillStyle = pillBg
-  ctx.fill()
-  ctx.fillStyle = accent.border
-  ctx.fillText(badgeText, CARD_W - pad - badgeW - 3, imgY + 31)
-
   // ── Info section ──
-  let y = imgY + imgH + 48
+  const infoX = PAD
+  const contentW = W - PAD * 2
+  let y = infoY + 22
 
   // Bird name
   ctx.textAlign = 'left'
-  ctx.font = '500 42px Georgia, serif'
-  ctx.fillStyle = t.text
-  if (ctx.measureText(bird.name).width > contentW) ctx.font = '500 34px Georgia, serif'
-  ctx.fillText(bird.name, infoX, y, contentW)
+  ctx.font = `700 ${nameSize}px Newsreader, Georgia, serif`
+  ctx.fillStyle = tier.accentName ? tier.accent : WHITE
+  ctx.fillText(ellipsis(ctx, bird.name, contentW), infoX, y + nameSize * 0.8)
 
   // Scientific name
-  y += 34
-  ctx.font = 'italic 300 18px Georgia, serif'
-  ctx.fillStyle = t.textFaint
+  y += nameSize + 10
+  ctx.font = 'italic 400 15px Newsreader, Georgia, serif'
+  ctx.fillStyle = GREY_DIM
   ctx.fillText(bird.scientificName, infoX, y)
 
-  // Tags row
-  y += 44
-  const gc = groupColor(bird.commonGroup)
-  let chipX = infoX
-  chipX += drawChip(ctx, chipX, y - 13, bird.commonGroup, gc.bg.replace('0.12', isDark ? '0.25' : '0.18'), gc.text) + 8
+  // Chips
+  y += 14
+  let cx = infoX
+  const cBg = gc.bg.replace('0.12', '0.2')
+  cx += chip(ctx, cx, y, bird.commonGroup, cBg, gc.text) + 6
 
-  if (bird.iucnStatus && IUCN_COLORS[bird.iucnStatus]) {
-    const ic = IUCN_COLORS[bird.iucnStatus]
-    const iLabel = `● ${bird.iucnStatus} ${IUCN_LABELS[bird.iucnStatus]}`
-    chipX += drawChip(ctx, chipX, y - 13, iLabel, `${ic}20`, ic) + 8
+  const iucn = IUCN_MAP[bird.iucnStatus]
+  if (iucn) {
+    const label = `● ${bird.iucnStatus} ${iucn.label}`
+    chip(ctx, cx, y, label, `${iucn.color}25`, iucn.color)
   }
 
-  // Divider
-  y += 40
-  ctx.strokeStyle = t.divider
+  // Divider — y += chip height (22) + gap (14)
+  y += 36
+  ctx.strokeStyle = tier.accentDivider ? `${tier.accent}40` : DIVIDER_DEFAULT
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(infoX, y)
-  ctx.lineTo(CARD_W - pad - 8, y)
+  ctx.lineTo(W - PAD, y)
   ctx.stroke()
 
-  // Metadata — 2-column grid
-  y += 36
-  const metaFields: [string, string][] = []
-  if (bird.habitat?.length) metaFields.push(['HABITAT', bird.habitat.join(', ')])
-  if (bird.size) metaFields.push(['SIZE', `${bird.size}${bird.sizeRange ? ` · ${bird.sizeRange}` : ''}`])
-  if (bird.colors) metaFields.push(['COLORS', bird.colors])
-  if (bird.diet?.length) metaFields.push(['DIET', bird.diet.join(', ')])
+  // Metadata — two-column: right-aligned label | left-aligned value
+  y += 18
+  const LABEL_COL = 84
+  ctx.textBaseline = 'alphabetic'
+  for (const [label, value] of meta) {
+    ctx.textAlign = 'right'
+    ctx.font = '600 11px Manrope, sans-serif'
+    ctx.fillStyle = GREY_DIM
+    ctx.fillText(label, infoX + LABEL_COL, y)
 
-  const colW = (contentW - 24) / 2
-  for (let i = 0; i < metaFields.length; i++) {
-    const [label, value] = metaFields[i]
-    const col = i % 2
-    const row = Math.floor(i / 2)
-    const mx = infoX + col * (colW + 24)
-    const my = y + row * 56
+    ctx.textAlign = 'left'
+    ctx.font = '400 13px Manrope, sans-serif'
+    ctx.fillStyle = '#BEBEBE'
+    ctx.fillText(ellipsis(ctx, value, contentW - LABEL_COL - 12), infoX + LABEL_COL + 12, y)
 
-    ctx.font = '700 10px sans-serif'
-    ctx.fillStyle = t.textFaint
-    ctx.fillText(label, mx, my)
-
-    ctx.font = '400 14px sans-serif'
-    ctx.fillStyle = t.textMuted
-    ctx.fillText(truncateText(ctx, value, colW), mx, my + 20)
+    y += metaLineH
   }
 
-  // Footer
-  ctx.font = '400 15px sans-serif'
-  ctx.fillStyle = t.textFaint
+  // Rarity label + footer — anchored to bottom
+  const rarityText = `★  ${rarityInfo.label.toUpperCase()}`
   ctx.textAlign = 'center'
-  ctx.globalAlpha = 0.5
-  ctx.fillText(APP_URL, CARD_W / 2, CARD_H - 36)
-  ctx.globalAlpha = 1
+  ctx.font = '700 12px Manrope, sans-serif'
+  ctx.fillStyle = tier.accent
+  ctx.letterSpacing = '1.5px'
+  ctx.fillText(rarityText, W / 2, H - 48)
+  ctx.letterSpacing = '0px'
 
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob!), 'image/png')
-  })
-}
+  // Footer — label + url on one horizontal line, centered as a unit
+  ctx.font = '400 10px Manrope, sans-serif'
+  const footerLabelW = ctx.measureText('explore the full collection at').width
+  ctx.font = '600 11px Manrope, sans-serif'
+  const footerUrlW = ctx.measureText(APP_URL).width
+  const footerGap = 7
+  const footerX = (W - footerLabelW - footerGap - footerUrlW) / 2
 
-function truncateText(ctx: CanvasRenderingContext2D, text: string, maxW: number): string {
-  if (ctx.measureText(text).width <= maxW) return text
-  let t = text
-  while (t.length > 0 && ctx.measureText(`${t}…`).width > maxW) t = t.slice(0, -1)
-  return `${t}…`
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
+  ctx.font = '400 10px Manrope, sans-serif'
+  ctx.fillStyle = GREY_DIM
+  ctx.fillText('explore the full collection at', footerX, H - 18)
+
+  ctx.font = '600 11px Manrope, sans-serif'
+  ctx.fillStyle = GREY
+  ctx.fillText(APP_URL, footerX + footerLabelW + footerGap, H - 18)
+
+  // ── Frame — uniform accent border, same width all sides ──
+  ctx.fillStyle = tier.accent
+  ctx.fillRect(0, 0, W, tier.frameW)
+  ctx.fillRect(0, 0, tier.frameW, H)
+  ctx.fillRect(W - tier.frameW, 0, tier.frameW, H)
+  ctx.fillRect(0, H - tier.frameW, W, tier.frameW)
+
+  return new Promise(resolve =>
+    canvas.toBlob(blob => resolve(blob!), 'image/png'),
+  )
 }
 
 export async function shareBirdCard(bird: Bird, imageUrl: string) {

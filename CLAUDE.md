@@ -32,13 +32,19 @@ Configured via `convict` in `src/config.js`. Key vars: `PORT` (default 8888), `N
 - **Data pipeline:** Bird data is generated via LLM prompts (see README), stored as JSON in `data/birds/`, and bulk-inserted via `src/scripts/insert-birds.js`
 - **Image delivery:** Dual mode via `VITE_IMG_DELIVERY_MODE` — `online` uses Cornell CDN URLs from MongoDB meta collection, `offline` serves from `public/images/birds/` (gitignored). Images are only loaded on the detail page, not the list.
 
-## Deployment (Netlify)
+## Deployment
 
+**Netlify (primary):**
 - `netlify.toml` at project root configures the build
 - Frontend: static site from `web/dist/`
 - Backend: serverless function at `netlify/functions/api.mjs` wraps Express via `serverless-http`
 - Redirects proxy `/v1.0/*` and `/_health` to the function
 - `src/app.js` skips static file serving when `process.env.NETLIFY` is set
+
+**Render (alternative):**
+- `render.yaml` at project root — single web service (Node 22, Singapore region)
+- Build: `npx pnpm@latest install && npm run build:FE`; Start: `node index.js`
+- Auto-deploys on commit; `MONGO_DB` must be set as a secret env var in the Render dashboard
 
 ## Frontend Design System
 
@@ -53,7 +59,24 @@ Configured via `convict` in `src/config.js`. Key vars: `PORT` (default 8888), `N
 - **Group color hashing:** `web/src/composables/groupColor.ts` — deterministic djb2 hash maps `commonGroup` names to a 10-color earthy palette. Same color on list and detail pages.
 - **Home page:** compact Pokédex-style rows (no images), API-powered search with debounced dropdown (300ms, 3+ chars), group filter
 - **Detail page:** image carousel with swipe support, dot indicators, image tags (adult/juvenile/male/female — "default" tag hidden). Prev/next bird navigation is in the intro panel, not on the image.
-- **Panel backgrounds:** accent-tinted (3.5% forest green in light, 4% mint in dark) with accent-derived top border — branded surface, not generic gray.
+- **Panel backgrounds:** accent-tinted (5% forest green in light, 6% mint in dark) with `--surface-gradient` overlay and a 2px accent-derived top border — branded surface, not generic gray.
+- **Elevation system:** `--shadow-xs / sm / md / lg` (upward-scaled opacity for dark mode) + `--shadow-up-sm` for bottom nav. Dark values are 3–4× the light opacity. Never use raw `box-shadow` values for UI chrome — always use these tokens.
+- **Surface gradient:** `--surface-gradient` (linear, white 4% → transparent) adds subtle dimensionality to panels without a second color. Dark variant uses 2.5%.
+- **Typography floor:** no `font-weight` below 400 anywhere (300 is invisible in dark mode), no text below 11px. These are hard rules, not guidelines.
+
+### Rarity system
+- `web/src/composables/rarity.ts` — 5 tiers: Common (1) → Legendary (5). Each tier has a `label`, `color`, `bg`, and `glow` for light and dark variants.
+- Visual treatment on detail page: colored rarity badge with star, glow intensifies with tier.
+- Share card accent colors (in `shareCard.ts`) are separate from rarity.ts colors — the card always uses the dark-optimized TIERS palette.
+
+### Share card
+- `web/src/composables/shareCard.ts` — Canvas API, always dark (no theme branching).
+- **Dimensions:** 630×880 logical, rendered at 2× (1260×1760px). No rounded corners on card.
+- **Layout:** bird image fills 55% (cover crop), info section below. Serial pill bottom-left of image. Two-column metadata (right-aligned labels, left-aligned values).
+- **Rarity accent:** 5 tiers each get one accent color (`#7A8B7A` sage → `#FF6B35` coral). Higher tiers apply the accent to progressively more elements (serial → divider → name).
+- **Image loading:** tries proxy endpoint first (`/v1.0/birds/image-proxy?url=...`), falls back to direct URL.
+- **Sharing:** Web Share API with PNG file; falls back to `<a download>` if not supported.
+- **Dev tool:** `web/src/pages/test-cards.vue` — fetches one real bird per rarity tier from the API and bulk-generates/downloads all 5 cards. Route is present but commented out in `web/typed-router.d.ts` (dev-only, not linked in the UI).
 
 ## PWA
 

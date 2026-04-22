@@ -9,7 +9,9 @@ const isDetailPage = computed(() => route.path.startsWith('/bird/'))
 
 function onScroll() {
   const y = window.scrollY
-  if (Math.abs(y - lastScrollY) < 10) return
+  if (Math.abs(y - lastScrollY) < 10)
+    return
+
   hidden.value = isDetailPage.value && y > lastScrollY && y > 56
   lastScrollY = y
 }
@@ -29,7 +31,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     }"
   >
     <a href="/" class="header-brand" aria-label="FeatherBase home">
-      <img src="/favicon.svg" alt="" class="header-logo" width="22" height="22" />
+      <img src="/favicon.svg" alt="" class="header-logo" width="22" height="22">
       <span class="header-title">FeatherBase</span>
     </a>
     <div class="header-actions">

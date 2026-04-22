@@ -25,7 +25,9 @@ html.dark {
   border: 0;
 }
 
-.capitalize { text-transform: capitalize; }
+.capitalize {
+  text-transform: capitalize;
+}
 
 /* ── App Shell ── */
 .app-shell {
@@ -47,7 +49,7 @@ html.dark {
 
 @media (max-width: 640px) {
   .app-content {
-    padding-bottom: 64px;
+    padding-bottom: 60px;
   }
 }
 
@@ -61,6 +63,7 @@ html.dark {
   top: 0;
   z-index: 100;
   transition: transform 0.3s ease;
+  border-bottom: 1px solid var(--color-divider);
 }
 
 @media (max-width: 768px) {
@@ -78,14 +81,14 @@ html.dark {
 }
 
 .header-logo {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
 }
 
 .header-title {
   font-family: var(--font-serif);
   font-size: var(--text-lg);
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .header-actions {
@@ -107,7 +110,9 @@ html.dark {
   cursor: pointer;
   font-size: var(--text-lg);
   text-decoration: none;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .header-btn:hover {
@@ -130,12 +135,13 @@ html.dark {
     left: 0;
     right: 0;
     z-index: 100;
-    height: 64px;
+    height: 60px;
     padding-bottom: env(safe-area-inset-bottom, 0);
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border-top: 1px solid var(--color-divider);
+    box-shadow: var(--shadow-up-sm);
   }
 
   .bottom-nav-item {
@@ -159,13 +165,17 @@ html.dark {
     color: var(--color-accent);
   }
 
+  .bottom-nav-item.active .bottom-nav-label {
+    font-weight: 700;
+  }
+
   .bottom-nav-icon {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .bottom-nav-label {
     font-family: var(--font-sans);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.02em;
   }
@@ -222,7 +232,9 @@ html.dark {
 
 /* ── Page transitions ── */
 .page-enter-active {
-  transition: opacity 0.22s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.22s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition:
+    opacity 0.22s cubic-bezier(0.25, 0.1, 0.25, 1),
+    transform 0.22s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .page-leave-active {

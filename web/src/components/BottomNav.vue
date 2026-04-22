@@ -2,7 +2,6 @@
 const route = useRoute()
 
 const isHome = computed(() => route.path === '/')
-const isDetail = computed(() => route.path.startsWith('/bird/'))
 </script>
 
 <template>
