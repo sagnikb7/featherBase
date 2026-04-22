@@ -214,12 +214,9 @@ onUnmounted(() => {
   <div class="home-page">
 
   <header class="page-hero">
-    <div class="page-hero-brand">
-      <img src="/favicon.svg" alt="" class="page-hero-logo" width="28" height="28">
-      <h1 class="page-hero-title">
-        FeatherBase
-      </h1>
-    </div>
+    <h1 class="page-hero-title">
+      <span class="page-hero-feather">feather</span><span class="page-hero-base">Base</span>
+    </h1>
     <p class="page-hero-tagline">
       Birds of the Indian Subcontinent
     </p>
