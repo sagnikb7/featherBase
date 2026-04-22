@@ -2,7 +2,9 @@ import NodeCache from 'node-cache';
 import birdModel from '#models/birdBasicModel.js';
 import metaModel from '#models/metaModel.js';
 
-const cache = new NodeCache({ stdTTL: 3600 }); // 1 hour TTL
+const cache = new NodeCache({ stdTTL: 3600 });
+
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const getBirdById = async (id) => {
   const [data] = await birdModel.get({ serialNumber: id });
@@ -10,11 +12,18 @@ const getBirdById = async (id) => {
   return { ...data, meta: { images: metaData?.images || [] } };
 };
 
-const getAllBirds = async ({ page = 1, size = 10, family, group, order } = {}) => {
+const getAllBirds = async ({ page = 1, size = 10, search, family, group, order } = {}) => {
   const filter = {};
-  if (family) filter.family = { $regex: new RegExp(`^${family}$`, 'i') };
-  if (group) filter.commonGroup = { $regex: new RegExp(`^${group}$`, 'i') };
-  if (order) filter.order = { $regex: new RegExp(`^${order}$`, 'i') };
+  if (search) {
+    const escaped = escapeRegex(search);
+    filter.$or = [
+      { name: { $regex: escaped, $options: 'i' } },
+      { scientificName: { $regex: escaped, $options: 'i' } },
+    ];
+  }
+  if (family) filter.family = { $regex: new RegExp(`^${escapeRegex(family)}$`, 'i') };
+  if (group) filter.commonGroup = { $regex: new RegExp(`^${escapeRegex(group)}$`, 'i') };
+  if (order) filter.order = { $regex: new RegExp(`^${escapeRegex(order)}$`, 'i') };
 
   const skip = (page - 1) * size;
 
@@ -22,29 +31,18 @@ const getAllBirds = async ({ page = 1, size = 10, family, group, order } = {}) =
     birdModel.get(
       filter,
       { serialNumber: 1 },
-      { serialNumber: 1, name: 1, scientificName: 1 },
+      { serialNumber: 1, name: 1, scientificName: 1, commonGroup: 1 },
       { skip, limit: size },
     ),
     birdModel.count(filter),
   ]);
 
-  const serialNumbers = birds.map((b) => b.serialNumber);
-  const birdMetas = await metaModel.get(
-    { serialNumber: { $in: serialNumbers } },
-    null,
-    { serialNumber: 1, images: 1 },
-  );
-
-  const birdMetaMap = {};
-  birdMetas.forEach((m) => { birdMetaMap[m.serialNumber] = { images: m.images }; });
-
   const data = birds.map((b) => ({
     id: b.serialNumber,
+    serialNumber: b.serialNumber,
     name: b.name,
     scientificName: b.scientificName,
-    image: birdMetaMap[b.serialNumber]?.images[0]
-      ? { url: birdMetaMap[b.serialNumber].images[0].url, file: birdMetaMap[b.serialNumber].images[0].file }
-      : '',
+    commonGroup: b.commonGroup,
   }));
 
   const totalPages = Math.ceil(total / size);

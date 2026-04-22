@@ -1,30 +1,25 @@
 import express from 'express';
 import helmet from 'helmet';
-import * as _Sentry from '@sentry/node'; // eslint-disable-line no-unused-vars
 import timeout from 'connect-timeout';
-
 import lgr from '#logger';
 
 const logger = lgr('basic mw');
 
 const basicMiddleware = (app) => {
-  logger.info('adding sentry tracing,req handlers');
-  // app.use(Sentry.Handlers.requestHandler());
-  // app.use(Sentry.Handlers.tracingHandler());
   logger.info('adding basic middlewares');
-  // basic safety
+
   app.use(timeout('30s'));
   app.use(
     helmet({
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'"], // Avoid 'unsafe-inline' unless absolutely necessary
-          styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles if used
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: [
             "'self'",
             'data:',
-            'https://cdn.download.ams.birds.cornell.edu', // allow Cornell bird images
+            'https://cdn.download.ams.birds.cornell.edu',
           ],
           connectSrc: ["'self'"],
           fontSrc: ["'self'", 'https:', 'data:'],
@@ -33,11 +28,10 @@ const basicMiddleware = (app) => {
           upgradeInsecureRequests: [],
         },
       },
-      crossOriginEmbedderPolicy: false, // optional: if you get COEP-related errors
+      crossOriginEmbedderPolicy: false,
     }),
   );
 
-  // body-parsers
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 };

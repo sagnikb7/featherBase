@@ -6,8 +6,7 @@
 @import './tokens.css';
 @import './base.css';
 
-/* Components — add or remove to experiment */
-@import './components/card.css';
+/* Components */
 @import './components/search.css';
 @import './components/status.css';
 @import './components/bird-detail.css';

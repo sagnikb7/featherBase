@@ -1,6 +1,5 @@
 /* ──────────────────────────────────────────
-   Status indicators: loading, error, empty
-   Tonal shifts instead of borders.
+   Status indicators: loading, error
    ────────────────────────────────────────── */
 
 .status-box {
@@ -15,8 +14,7 @@
   color: var(--color-accent);
 }
 
-.error,
-.no-results {
+.error {
   background-color: var(--color-danger-light);
   color: var(--color-danger-text);
 }

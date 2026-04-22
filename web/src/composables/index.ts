@@ -1,4 +1,5 @@
 export * from './dark'
+export * from './groupColor'
 export * from './iucn'
 
 // In dev, Vite proxy forwards /v1.0/* to the backend.

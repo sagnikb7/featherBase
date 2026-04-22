@@ -1,43 +1,24 @@
-<script setup>
-import { computed, ref, watch } from 'vue'
-import Fuse from 'fuse.js'
-import { baseUrl } from '~/composables'
-import BirdCard from '~/components/BirdCard.vue'
+<script setup lang="ts">
+import { baseUrl, groupColor } from '~/composables'
 
-const ONLINE_MODE = import.meta.env.VITE_IMG_DELIVERY_MODE === 'online'
 const PAGE_SIZE = 20
 
 const searchQuery = ref('')
 const selectedGroup = ref('')
-const groups = ref([])
-const birds = ref([])
+const groups = ref<string[]>([])
+const birds = ref<any[]>([])
+const searchResults = ref<any[]>([])
 const loading = ref(true)
 const loadingMore = ref(false)
-const error = ref(null)
+const searching = ref(false)
+const showDropdown = ref(false)
+const error = ref<string | null>(null)
 const hasNext = ref(false)
 const currentPage = ref(1)
 
-const fuseOptions = {
-  keys: [
-    { name: 'name', weight: 0.7 },
-    { name: 'scientificName', weight: 0.3 },
-  ],
-  threshold: 0.4,
-  includeScore: true,
-  ignoreDiacritics: true,
-  minMatchCharLength: 2,
-}
+let searchTimer: ReturnType<typeof setTimeout> | null = null
 
-let fuse = null
-
-const isSearching = computed(() => searchQuery.value && searchQuery.value.length >= 2)
-
-const displayBirds = computed(() => {
-  if (!isSearching.value || !fuse)
-    return birds.value
-
-  return fuse.search(searchQuery.value).map(result => result.item)
-})
+const isSearchActive = computed(() => searchQuery.value.length >= 3)
 
 async function fetchGroups() {
   try {
@@ -46,8 +27,8 @@ async function fetchGroups() {
     if (result.success)
       groups.value = result.data
   }
-  catch (err) {
-    console.error('Error fetching groups:', err)
+  catch {
+    // groups are non-critical
   }
 }
 
@@ -56,8 +37,9 @@ async function fetchBirds(page = 1) {
   try {
     if (isFirstPage) loading.value = true
     else loadingMore.value = true
+    error.value = null
 
-    const params = new URLSearchParams({ page, size: PAGE_SIZE })
+    const params = new URLSearchParams({ page: String(page), size: String(PAGE_SIZE) })
     if (selectedGroup.value)
       params.set('group', selectedGroup.value)
 
@@ -65,30 +47,76 @@ async function fetchBirds(page = 1) {
     const result = await response.json()
 
     if (result.success) {
-      if (isFirstPage) {
-        birds.value = result.data
-      }
-      else {
-        birds.value = [...birds.value, ...result.data]
-      }
+      birds.value = isFirstPage ? result.data : [...birds.value, ...result.data]
       hasNext.value = result.pagination.hasNext
       currentPage.value = result.pagination.page
-
-      // Rebuild fuse index with all loaded birds
-      fuse = new Fuse(birds.value, fuseOptions)
     }
     else {
       throw new Error('Failed to fetch birds data')
     }
   }
-  catch (err) {
+  catch (err: any) {
     error.value = err.message
-    console.error('Error fetching birds:', err)
   }
   finally {
     loading.value = false
     loadingMore.value = false
   }
+}
+
+async function searchBirds(query: string) {
+  if (query.length < 3) {
+    searchResults.value = []
+    showDropdown.value = false
+    return
+  }
+
+  searching.value = true
+  try {
+    const params = new URLSearchParams({ search: query, size: '8' })
+    if (selectedGroup.value)
+      params.set('group', selectedGroup.value)
+
+    const response = await fetch(`${baseUrl}/v1.0/birds?${params}`)
+    const result = await response.json()
+
+    if (result.success) {
+      searchResults.value = result.data
+      showDropdown.value = true
+    }
+  }
+  catch {
+    searchResults.value = []
+  }
+  finally {
+    searching.value = false
+  }
+}
+
+function onSearchInput() {
+  if (searchTimer) clearTimeout(searchTimer)
+  if (searchQuery.value.length < 3) {
+    searchResults.value = []
+    showDropdown.value = false
+    return
+  }
+  searchTimer = setTimeout(() => searchBirds(searchQuery.value), 300)
+}
+
+function clearSearch() {
+  searchQuery.value = ''
+  searchResults.value = []
+  showDropdown.value = false
+}
+
+function dismissDropdown() {
+  setTimeout(() => { showDropdown.value = false }, 150)
+}
+
+function onGroupChange() {
+  birds.value = []
+  clearSearch()
+  fetchBirds(1)
 }
 
 function loadMore() {
@@ -97,21 +125,13 @@ function loadMore() {
   fetchBirds(currentPage.value + 1)
 }
 
-function onGroupChange() {
-  birds.value = []
-  searchQuery.value = ''
-  fetchBirds(1)
-}
-
-// Intersection observer for infinite scroll
-const sentinel = ref(null)
+const sentinel = ref<HTMLElement | null>(null)
 
 onMounted(() => {
   const observer = new IntersectionObserver(
     (entries) => {
-      if (entries[0].isIntersecting && !isSearching.value) {
+      if (entries[0].isIntersecting)
         loadMore()
-      }
     },
     { rootMargin: '200px' },
   )
@@ -130,13 +150,61 @@ fetchBirds()
 <template>
   <div class="search-container">
     <div class="search-row">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search birds by name..."
-        :disabled="loading"
-      >
+      <div class="search-input-wrap">
+        <label class="sr-only" for="bird-search">Search birds</label>
+        <div i-ph-magnifying-glass class="search-icon" />
+        <input
+          id="bird-search"
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search by name or scientific name..."
+          autocomplete="off"
+          :disabled="loading"
+          @input="onSearchInput"
+          @focus="isSearchActive && searchResults.length && (showDropdown = true)"
+          @blur="dismissDropdown"
+        >
+        <button
+          v-if="searchQuery"
+          class="search-clear"
+          aria-label="Clear search"
+          @mousedown.prevent="clearSearch"
+        >
+          <div i-ph-x />
+        </button>
+
+        <div v-if="showDropdown" class="search-dropdown">
+          <div v-if="searching" class="search-dropdown-status">
+            Searching...
+          </div>
+          <template v-else-if="searchResults.length">
+            <a
+              v-for="bird in searchResults"
+              :key="bird.id"
+              :href="`/bird/${bird.id}`"
+              class="search-result"
+            >
+              <span class="search-result-serial">#{{ String(bird.serialNumber).padStart(3, '0') }}</span>
+              <div class="search-result-info">
+                <span class="search-result-name">{{ bird.name }}</span>
+                <span class="search-result-scientific">{{ bird.scientificName }}</span>
+              </div>
+              <span
+                v-if="bird.commonGroup"
+                class="search-result-group capitalize"
+                :style="{ background: groupColor(bird.commonGroup).bg, color: groupColor(bird.commonGroup).text }"
+              >{{ bird.commonGroup }}</span>
+            </a>
+          </template>
+          <div v-else class="search-dropdown-status">
+            No birds found for "{{ searchQuery }}"
+          </div>
+        </div>
+      </div>
+
+      <label class="sr-only" for="group-filter">Filter by group</label>
       <select
+        id="group-filter"
         v-model="selectedGroup"
         :disabled="loading"
         @change="onGroupChange"
@@ -149,33 +217,36 @@ fetchBirds()
         </option>
       </select>
     </div>
-    <div v-if="loading" class="status-box loading">
+    <div v-if="loading" class="status-box loading" role="status">
       Loading birds...
     </div>
-    <div v-if="error" class="status-box error">
+    <div v-if="error" class="status-box error" role="alert">
       {{ error }}
     </div>
-    <div
-      v-if="!loading && isSearching && displayBirds.length === 0"
-      class="status-box no-results"
-    >
-      No birds found matching "{{ searchQuery }}"
-    </div>
-    <div v-if="!loading && isSearching" class="search-info">
-      {{ displayBirds.length }} result{{ displayBirds.length !== 1 ? 's' : '' }}
-    </div>
   </div>
 
-  <div v-if="!loading" class="card-container">
-    <BirdCard
-      v-for="bird in displayBirds"
+  <div v-if="!loading" class="bird-list">
+    <a
+      v-for="bird in birds"
       :key="bird.id"
-      :bird="bird"
-    />
+      :href="`/bird/${bird.id}`"
+      class="bird-row"
+    >
+      <span class="bird-row-serial">#{{ String(bird.serialNumber).padStart(3, '0') }}</span>
+      <div class="bird-row-info">
+        <span class="bird-row-name">{{ bird.name }}</span>
+        <span class="bird-row-scientific">{{ bird.scientificName }}</span>
+      </div>
+      <span
+        v-if="bird.commonGroup"
+        class="bird-row-group capitalize"
+        :style="{ background: groupColor(bird.commonGroup).bg, color: groupColor(bird.commonGroup).text }"
+      >{{ bird.commonGroup }}</span>
+      <div i-ph-caret-right class="bird-row-arrow" />
+    </a>
   </div>
 
-  <!-- Infinite scroll sentinel + loader -->
-  <div v-if="!loading && !isSearching && hasNext" ref="sentinel" class="scroll-loader">
+  <div v-if="!loading && hasNext" ref="sentinel" class="scroll-loader">
     <div v-if="loadingMore" class="scroll-loader-dots">
       <span /><span /><span />
     </div>

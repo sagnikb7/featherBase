@@ -1,0 +1,24 @@
+{
+  "name": "FeatherBase",
+  "short_name": "FeatherBase",
+  "description": "A Pokédex-style database of Indian bird species",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcf9f5",
+  "theme_color": "#02241d",
+  "orientation": "portrait-primary",
+  "categories": ["education", "reference"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

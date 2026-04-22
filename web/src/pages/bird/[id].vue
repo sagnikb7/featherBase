@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Bird, SingleBirdResponse } from '~/types/common'
-import { baseUrl, useIucnStatus } from '~/composables'
+import type { Bird, Image, SingleBirdResponse } from '~/types/common'
+import { baseUrl, groupColor, useIucnStatus } from '~/composables'
 import BirdImage from '~/components/BirdImage.vue'
 
 const route = useRoute()
@@ -10,16 +10,26 @@ const birdId = ref(Number.parseInt(route.params.id as string))
 const ONLINE_MODE = import.meta.env.VITE_IMG_DELIVERY_MODE === 'online'
 
 const currentBird = ref<Bird | undefined>()
-const imageUrl = ref('')
+const images = ref<Image[]>([])
+const activeImage = ref(0)
 const loading = ref(true)
 
-const { iucnStatusClasses, iucnStatusExplanation } = useIucnStatus(currentBird)
+const { iucnStatus, iucnStatusLabel, iucnStatusExplanation, iucnChipClass } = useIucnStatus(currentBird)
 
 const hasPrev = computed(() => birdId.value > 1)
 const hasNext = computed(() => !!currentBird.value)
 
+function imageSrc(img: Image) {
+  return ONLINE_MODE ? img.url : `/images/birds/${img.file}`
+}
+
+function visibleTags(img: Image) {
+  return (img.tags || []).filter(t => t.toLowerCase() !== 'default')
+}
+
 async function getBirdData(id: number) {
   loading.value = true
+  activeImage.value = 0
   try {
     const res = (await (
       await fetch(`${baseUrl}/v1.0/birds/${id}`)
@@ -27,18 +37,16 @@ async function getBirdData(id: number) {
 
     if (res?.data?.name) {
       currentBird.value = res.data
-      const img = res.data.meta.images[0]
-      imageUrl.value = img
-        ? (ONLINE_MODE ? img.url : `/images/birds/${img.file}`)
-        : ''
+      images.value = res.data.meta?.images || []
     }
     else {
       currentBird.value = undefined
+      images.value = []
     }
   }
-  catch (e) {
-    console.error(e)
+  catch {
     currentBird.value = undefined
+    images.value = []
   }
   finally {
     loading.value = false
@@ -51,9 +59,28 @@ function navigate(id: number) {
   getBirdData(id)
 }
 
+function prevImage() {
+  if (activeImage.value > 0) activeImage.value--
+}
+
+function nextImage() {
+  if (activeImage.value < images.value.length - 1) activeImage.value++
+}
+
+let touchStartX = 0
+function onTouchStart(e: TouchEvent) {
+  touchStartX = e.touches[0].clientX
+}
+function onTouchEnd(e: TouchEvent) {
+  const dx = e.changedTouches[0].clientX - touchStartX
+  if (Math.abs(dx) < 40) return
+  if (dx < 0) nextImage()
+  else prevImage()
+}
+
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'ArrowLeft' && hasPrev.value) navigate(birdId.value - 1)
-  if (e.key === 'ArrowRight' && hasNext.value) navigate(birdId.value + 1)
+  if (e.key === 'ArrowUp' && hasPrev.value) navigate(birdId.value - 1)
+  if (e.key === 'ArrowDown' && hasNext.value) navigate(birdId.value + 1)
 }
 
 onMounted(() => window.addEventListener('keydown', onKeydown))
@@ -64,49 +91,107 @@ getBirdData(birdId.value)
 
 <template>
   <div v-if="currentBird" class="bird-detail">
-    <!-- Top-left: Image -->
-    <div class="bird-detail-image">
+    <div
+      class="bird-detail-image"
+      @touchstart.passive="onTouchStart"
+      @touchend.passive="onTouchEnd"
+    >
       <BirdImage
-        :src="imageUrl"
+        v-if="images.length"
+        :src="imageSrc(images[activeImage])"
         :alt="currentBird.name"
         :colors="currentBird.colors"
         class="bird-detail-img-contain"
       />
-      <!-- Navigation arrows overlaid on image -->
-      <button
-        v-if="hasPrev"
-        class="bird-nav bird-nav--prev"
-        title="Previous bird (←)"
-        @click="navigate(birdId - 1)"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </button>
-      <button
-        v-if="hasNext"
-        class="bird-nav bird-nav--next"
-        title="Next bird (→)"
-        @click="navigate(birdId + 1)"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
-      </button>
+      <BirdImage
+        v-else
+        src=""
+        :alt="currentBird.name"
+        :colors="currentBird.colors"
+        class="bird-detail-img-contain"
+      />
+
+      <div v-if="visibleTags(images[activeImage] || {}).length" class="image-tags">
+        <span v-for="tag in visibleTags(images[activeImage])" :key="tag" class="image-tag">
+          {{ tag }}
+        </span>
+      </div>
+
+      <div v-if="images.length > 1" class="carousel-controls">
+        <button
+          class="carousel-arrow"
+          :disabled="activeImage === 0"
+          aria-label="Previous image"
+          @click="prevImage"
+        >
+          <div i-ph-caret-left />
+        </button>
+        <div class="carousel-dots">
+          <button
+            v-for="(_, i) in images"
+            :key="i"
+            class="carousel-dot"
+            :class="{ active: i === activeImage }"
+            :aria-label="`Image ${i + 1}`"
+            @click="activeImage = i"
+          />
+        </div>
+        <button
+          class="carousel-arrow"
+          :disabled="activeImage === images.length - 1"
+          aria-label="Next image"
+          @click="nextImage"
+        >
+          <div i-ph-caret-right />
+        </button>
+      </div>
     </div>
 
-    <!-- Top-right: Intro -->
     <div class="bird-detail-intro">
-      <h1 class="bird-name">
-        {{ currentBird.name }}
-      </h1>
-      <div class="bird-subtitle">
-        <p class="bird-scientific">{{ currentBird.scientificName }}</p>
-        <span
-          :title="iucnStatusExplanation"
-          :class="`iucn-badge ${iucnStatusClasses}`"
+      <div class="bird-nav-row">
+        <button
+          class="bird-nav-btn"
+          :disabled="!hasPrev"
+          aria-label="Previous bird"
+          @click="navigate(birdId - 1)"
         >
-          {{ currentBird.iucnStatus }}
+          <div i-ph-caret-left />
+          <span>Prev</span>
+        </button>
+        <span class="bird-serial">
+          #{{ String(currentBird.serialNumber).padStart(3, '0') }}
+        </span>
+        <button
+          class="bird-nav-btn"
+          :disabled="!hasNext"
+          aria-label="Next bird"
+          @click="navigate(birdId + 1)"
+        >
+          <span>Next</span>
+          <div i-ph-caret-right />
+        </button>
+      </div>
+
+      <div class="bird-identity">
+        <h1 class="bird-name">
+          {{ currentBird.name }}
+        </h1>
+        <p class="bird-scientific">{{ currentBird.scientificName }}</p>
+      </div>
+
+      <div class="bird-badges">
+        <span
+          class="detail-tag capitalize"
+          :style="{ background: groupColor(currentBird.commonGroup).bg, color: groupColor(currentBird.commonGroup).text }"
+        >{{ currentBird.commonGroup }}</span>
+        <span
+          v-if="iucnStatus"
+          :title="iucnStatusExplanation"
+          :class="['iucn-chip', iucnChipClass]"
+        >
+          <span class="iucn-dot" />
+          <span class="iucn-code">{{ iucnStatus }}</span>
+          <span class="iucn-label">{{ iucnStatusLabel }}</span>
         </span>
       </div>
 
@@ -126,49 +211,42 @@ getBirdData(birdId.value)
       </div>
     </div>
 
-    <!-- Bottom-left: Habitat & Range -->
     <div class="bird-detail-panel">
-      <p class="panel-title">Habitat & Range</p>
-      <div class="detail-meta">
+      <p class="panel-title">
+        <span i-ph-tree-evergreen class="panel-icon" />
+        Habitat & Range
+      </p>
+      <div class="detail-meta detail-meta--stacked">
         <div class="detail-meta-item">
           <span class="detail-meta-label">Habitat</span>
-          <span class="detail-meta-value capitalize">{{ currentBird.habitat.join(', ') }}</span>
+          <div class="tag-row">
+            <span v-for="h in currentBird.habitat" :key="h" class="detail-tag capitalize">{{ h }}</span>
+          </div>
         </div>
         <div class="detail-meta-item">
           <span class="detail-meta-label">Best seen at</span>
           <span class="detail-meta-value">{{ currentBird.bestSeenAt }}</span>
         </div>
-        <div class="detail-meta-item">
-          <span class="detail-meta-label">Distribution</span>
-          <span class="detail-meta-value capitalize">{{ currentBird.distributionRangeSize }}</span>
-        </div>
-        <div class="detail-meta-item">
-          <span class="detail-meta-label">Migration</span>
-          <span class="detail-meta-value capitalize">{{ currentBird.migrationStatus }}</span>
+        <div class="detail-meta-item detail-meta-pair">
+          <div>
+            <span class="detail-meta-label">Distribution</span>
+            <span class="detail-meta-value capitalize">{{ currentBird.distributionRangeSize }}</span>
+          </div>
+          <div>
+            <span class="detail-meta-label">Migration</span>
+            <span class="detail-meta-value capitalize">{{ currentBird.migrationStatus }}</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Bottom-right: Taxonomy & Diet -->
-    <div class="bird-detail-panel">
-      <p class="panel-title">Taxonomy</p>
-      <div class="detail-meta">
-        <div class="detail-meta-item">
-          <span class="detail-meta-label">Order</span>
-          <span class="detail-meta-value">{{ currentBird.order }}</span>
-        </div>
-        <div class="detail-meta-item">
-          <span class="detail-meta-label">Family</span>
-          <span class="detail-meta-value">{{ currentBird.family }}</span>
-        </div>
-        <div class="detail-meta-item">
-          <span class="detail-meta-label">Group</span>
-          <span class="detail-meta-value capitalize">{{ currentBird.commonGroup }}</span>
-        </div>
-        <div v-if="currentBird.diet?.length" class="detail-meta-item">
-          <span class="detail-meta-label">Diet</span>
-          <span class="detail-meta-value capitalize">{{ currentBird.diet.join(', ') }}</span>
-        </div>
+    <div v-if="currentBird.diet?.length" class="bird-detail-panel">
+      <p class="panel-title">
+        <span i-ph-bowl-food class="panel-icon" />
+        Diet
+      </p>
+      <div class="tag-row">
+        <span v-for="d in currentBird.diet" :key="d" class="detail-tag capitalize">{{ d }}</span>
       </div>
     </div>
   </div>

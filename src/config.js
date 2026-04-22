@@ -10,7 +10,7 @@ const config = convict({
   },
   mode: {
     doc: 'mode of the service',
-    format: ['server', 'websocket', 'consumer'],
+    format: ['server'],
     default: 'server',
     env: 'MODE',
     arg: 'mode',
@@ -36,29 +36,6 @@ const config = convict({
     env: 'SERVICE_NAME',
     arg: 'service_name',
   },
-  imageDeliveryMode: {
-    doc: 'image delivery mode',
-    format: String,
-    default: 'online',
-    env: 'VITE_IMG_DELIVERY_MODE',
-    arg: 'img_delivery_mode',
-  },
-  sentry: {
-    dsn: {
-      doc: 'sentry DSN',
-      format: String,
-      default: '',
-      env: 'SENTRY_DSN',
-      arg: 'sentry_dsn',
-    },
-    environment: {
-      doc: 'sentry environment',
-      format: String,
-      default: '',
-      env: 'SENTRY_ENVIRONMENT',
-      arg: 'sentry_environment',
-    },
-  },
   database: {
     mongo: {
       doc: 'mongo connection string',
@@ -66,23 +43,6 @@ const config = convict({
       default: '',
       env: 'MONGO_DB',
       arg: 'mongo_db',
-    },
-
-  },
-  aes: {
-    key: {
-      doc: 'AES key',
-      format: String,
-      default: '',
-      env: 'AES_KEY',
-      arg: 'aes_key',
-    },
-    iv: {
-      doc: 'AES IV',
-      format: String,
-      default: '',
-      env: 'AES_IV',
-      arg: 'aes_iv',
     },
   },
 });

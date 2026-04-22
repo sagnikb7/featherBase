@@ -50,7 +50,7 @@ watch(() => props.src, () => {
 </script>
 
 <template>
-  <div class="bird-img-wrap" :style="{ background: fallbackGradient }">
+  <div class="bird-img-wrap" :style="{ background: loaded && !failed ? 'var(--color-bg-muted)' : fallbackGradient }">
     <img
       v-if="src && !failed"
       :src="src"
@@ -80,7 +80,7 @@ watch(() => props.src, () => {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity var(--transition-base);
 }
 
 .bird-img--loaded {
@@ -95,8 +95,8 @@ watch(() => props.src, () => {
   padding: var(--space-4);
   font-family: var(--font-serif);
   font-size: var(--text-lg);
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
   pointer-events: none;
 }
 </style>

@@ -1,18 +1,20 @@
 <template>
   <nav
-    class="flex items-center justify-between px-6 py-3"
+    class="header"
     :style="{
       background: 'var(--glass-bg)',
       backdropFilter: 'blur(var(--glass-blur))',
       WebkitBackdropFilter: 'blur(var(--glass-blur))',
     }"
   >
-    <a href="/" class="flex items-center gap-2 text-lg no-underline" style="color: var(--color-text);">
-      <div i-ph-bird-duotone text-xl />
-      <span font-serif font-light>FeatherBase</span>
+    <a href="/" class="header-brand" aria-label="FeatherBase home">
+      <img src="/favicon.svg" alt="" class="header-logo" width="22" height="22" />
+      <span class="header-title">FeatherBase</span>
     </a>
-    <button icon-btn @click="toggleDark()" style="color: var(--color-text-muted);">
-      <div i-ph-sun-duotone dark:i-ph-moon-duotone />
-    </button>
+    <div class="header-actions">
+      <button class="header-btn" aria-label="Toggle dark mode" @click="toggleDark()">
+        <div i-ph-sun-duotone dark:i-ph-moon-duotone />
+      </button>
+    </div>
   </nav>
 </template>

@@ -11,6 +11,7 @@ const getBirdByIdValidator = Joi.object({
 const getAllBirdsValidator = Joi.object({
   page: Joi.number().integer().min(1).default(1),
   size: Joi.number().integer().min(1).max(100).default(10),
+  search: Joi.string().trim().min(3).max(100),
   family: Joi.string().trim().max(100),
   group: Joi.string().trim().max(100),
   order: Joi.string().trim().max(100),

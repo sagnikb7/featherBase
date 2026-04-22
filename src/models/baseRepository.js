@@ -29,8 +29,7 @@ class BaseRepository {
   }
 
   async create(newObj) {
-     
-    const obj = new this.model({ ...newObj });
+    const obj = new this.model(newObj);
     const result = await obj.save();
     return result;
   }

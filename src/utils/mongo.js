@@ -8,13 +8,12 @@ const connectToDatabase = () => {
   const mongoURI = config.get('database').mongo;
 
   mongoose.connect(mongoURI, {
-    serverSelectionTimeoutMS: 30 * 1000, // Increase to 30 seconds or more
+    serverSelectionTimeoutMS: 30 * 1000,
   });
 
   const db = mongoose.connection;
 
-   
-  db.on('error', console.error.bind(console, 'mongoDB connection error:'));
+  db.on('error', (err) => logger.error(`mongoDB connection error: ${err}`));
   db.once('open', () => logger.info('mongoDB connected'));
   return db;
 };

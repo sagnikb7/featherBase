@@ -15,13 +15,12 @@ const getBirdsController = async (req, res, next) => {
 
 const getAllBirdsController = async (req, res, next) => {
   try {
-    const {
-      page, size, family, group, order,
-    } = req.validated?.query || req.query;
+    const { page, size, search, family, group, order } = req.validated?.query || req.query;
 
     const result = await getAllBirds({
-      page: page ? Number(page) : undefined,
-      size: size ? Number(size) : undefined,
+      page: Number(page) || undefined,
+      size: Number(size) || undefined,
+      search,
       family,
       group,
       order,

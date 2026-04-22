@@ -73,16 +73,20 @@
 
   /* ── Ambient Shadows ── */
   --shadow-card: none;
-  --shadow-card-hover: 0 0 40px rgba(28, 28, 25, 0.06);
+  --shadow-card-hover: 0 4px 24px rgba(28, 28, 25, 0.08), 0 1px 4px rgba(28, 28, 25, 0.04);
   --shadow-focus: 0 0 0 3px var(--color-accent-light);
 
   /* ── Glass ── */
-  --glass-bg: rgba(252, 249, 245, 0.7);
-  --glass-blur: 24px;
+  --glass-bg: rgba(252, 249, 245, 0.72);
+  --glass-blur: 20px;
 
   /* ── Transitions ── */
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.25s ease;
+  --transition-fast: 0.12s ease-out;
+  --transition-base: 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-gentle: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Texture — subtle paper grain ── */
+  --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
 /* ── Dark mode ── */
@@ -115,5 +119,5 @@
   --glass-bg: rgba(13, 21, 18, 0.7);
 
   --shadow-card: none;
-  --shadow-card-hover: 0 0 40px rgba(0, 0, 0, 0.15);
+  --shadow-card-hover: 0 4px 24px rgba(0, 0, 0, 0.18), 0 1px 4px rgba(0, 0, 0, 0.08);
 }
