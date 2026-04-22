@@ -1,0 +1,64 @@
+Bird LLM prompt
+
+You are an expert ornithologist and I want your help to create a Database of Indian bird species consisting of the following table
+
+Format of the JSON objects:
+- Name.
+- Scientific_Name.
+- IUCN_status:  which will include codes like (like: 'LC', 'NT', 'VU', 'EN', 'CR', 'EW', 'EX' ).
+- Habitat: example (like: woodland, desert, sea, wetland, grassland ).
+- Distribution_Range_Size: (among_these: very large, moderate, large, restricted )
+- Best_seen_at: (like: which state/region/national park/sanctuary in India there is report of good sighting seen/found  ).
+- Migration_status : ( resident, local migration, foreign ).
+- Order:  ( order of the species based on scientific name ).
+- Family:  (family of the species based on scientific name).
+- common_grouping (like: ducks / megapodes / cuckoos )
+- Rarity: rarity of the species based on distribution and sighting  ( 1 to 5 ) 1 being common and 5 being super rare.
+- How_to_identify:  ( male, female distinction, unique features and characteristics that will help ID the species ).
+- Primary_colors_of_the_bird: ( example: A Shikra is ashy-blue-grey with orange accents ).
+- Size_of_the_bird: ( 'tiny', 'small', 'medium', 'large', 'very large' . also  provide size in cm if possible ).
+- Diet : Mostly figs, berries and cultivated fruits, with termites, ants and other insects especially during breeding ( this is hard to parse ) figs , termites , ant during breeding ( this is a good format )
+
+Important guidelines:
+- Use the most current IUCN Red List status available (2024 assessment if published).
+- For Best_seen_at, prefer well-known Indian birding hotspots, national parks, wildlife sanctuaries, or states where eBird records are frequent.
+- Rarity should reflect actual Indian sighting frequency, not global abundance — a globally common species that is a rare vagrant to India should score 4 or 5.
+- How_to_identify must clearly distinguish the species from similar-looking species found in India (confusion species).
+- Primary_colors_of_the_bird should describe both sexes if they differ significantly.
+- Diet should list primary food sources and, where relevant, foraging behaviour.
+- If a field cannot be determined with confidence, use null rather than guessing.
+
+Please provide accurate information only in JSON format and no other text, as i need this for scientific purpose
+
+lets say one example of the data will look like :     {
+        "Name": "Red-breasted Merganser",
+        "Scientific_Name": "Mergus serrator",
+        "IUCN_status": "LC",
+        "Habitat": "coastal waters, large rivers",
+        "Distribution_Range_Size": "very large",
+        "Best_seen_at": "Coastal areas of India during winter",
+        "Migration_status": "foreign",
+        "Order": "Anseriformes",
+        "Family": "Anatidae",
+        "common_grouping": "ducks",
+        "Rarity": 3,
+        "How_to_identify": "Males with dark head and red breast, females with grey body and reddish head and neck.",
+        "Primary_colors_of_the_bird": "Black, red, grey",
+        "Size_of_the_bird": "medium, 52-58 cm",
+        "Diet": "Fish, aquatic invertebrates"
+    }
+
+a json file is also attached as the output reference 
+
+
+Provide it for the following bird species :
+Grey-headed fish eagle
+White-eyed buzzard
+Rufous-winged buzzard
+Grey-faced buzzard
+Rough-legged buzzard
+Upland buzzard
+Himalayan buzzard
+Long-legged buzzard
+Common buzzard
+Eastern barn owl

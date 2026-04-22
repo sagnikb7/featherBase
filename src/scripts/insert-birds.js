@@ -9,8 +9,8 @@ import birdBasicModel from '#models/birdBasicModel.js';
 
 import { generateMD5Hash } from '#utils/common.js';
 
-const START_FILE = 51;
-const END_FILE = 51;
+const START_FILE = 56;
+const END_FILE = 60;
 const BATCH_SIZE = 10;
 
 const BirdSchema = birdBasicModel;
@@ -60,8 +60,9 @@ const insertBirds = async () => {
         console.log(`inserting --> ${fc.Name}`);
         const oldRecord = await BirdSchema.getOne({ scientificName: fc.Scientific_Name });
         if (oldRecord) {
-          console.log('record already present');
-          return false;
+          console.log('record already present, skipping');
+          // eslint-disable-next-line no-continue
+          continue;
         }
 
         const resp = await BirdSchema.create(bird);
