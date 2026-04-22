@@ -153,7 +153,7 @@ The `search` param (min 3 chars) does case-insensitive matching on `name` and `s
 - **Mobile-first** — iOS-style bottom nav, organic card overlap on detail page, safe area support
 - **Dark mode** — comprehensive token-based theming, toggleable from header or bottom nav
 - **Rarity system** — 5-tier rarity (Common → Legendary) with progressive visual treatment on detail page: colored badge, glow effects, and accent saturation scaling with tier
-- **Trading card share** — "Share" on any bird's detail page generates a 630×880 (rendered at 2×) trading card via Canvas API: always-dark, bird image as hero, accent color driven by rarity tier. Web Share API with PNG download fallback
+- **Trading card share** — "Share" on any bird's detail page generates a 630×880 (rendered at 2×) trading card via Canvas API. Each rarity tier has a distinct deeply-saturated dark background (near-black for Common, rich hues for higher tiers) with a hard cut between image and info panel. Accent color, serial pill, divider, and name progressively adopt the tier accent as rarity increases. Web Share API with PNG download fallback
 
 ---
 

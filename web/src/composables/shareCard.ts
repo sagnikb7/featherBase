@@ -12,7 +12,7 @@ const FRAME = 0
 
 const WHITE = '#F2F2F2'
 const GREY = '#999999'
-const GREY_DIM = '#505050'
+const GREY_DIM = '#787878'
 const DIVIDER_DEFAULT = 'rgba(255, 255, 255, 0.07)'
 
 const IUCN_MAP: Record<string, { color: string, label: string }> = {
@@ -35,11 +35,11 @@ interface Tier {
 }
 
 const TIERS: Record<number, Tier> = {
-  1: { accent: '#7A8B7A', base: '#0B0F0B', surface: '#111711', accentSerial: false, accentDivider: false, accentName: false },
-  2: { accent: '#4ECDC4', base: '#081110', surface: '#0E1C1B', accentSerial: false, accentDivider: false, accentName: false },
-  3: { accent: '#7C5CFC', base: '#0C0914', surface: '#141020', accentSerial: true, accentDivider: false, accentName: false },
-  4: { accent: '#FFB800', base: '#120E04', surface: '#1C1608', accentSerial: true, accentDivider: true, accentName: false },
-  5: { accent: '#FF6B35', base: '#130805', surface: '#1F0E08', accentSerial: true, accentDivider: true, accentName: true },
+  1: { accent: '#7A8B7A', base: '#0D0D0D', surface: '#141414', accentSerial: false, accentDivider: false, accentName: false },
+  2: { accent: '#4ECDC4', base: '#041C1C', surface: '#062828', accentSerial: false, accentDivider: false, accentName: false },
+  3: { accent: '#7C5CFC', base: '#100828', surface: '#180F38', accentSerial: true, accentDivider: false, accentName: false },
+  4: { accent: '#FFB800', base: '#1C1200', surface: '#261800', accentSerial: true, accentDivider: true, accentName: false },
+  5: { accent: '#FF6B35', base: '#1A0400', surface: '#240800', accentSerial: true, accentDivider: true, accentName: true },
 }
 
 function loadImg(src: string): Promise<HTMLImageElement> {
@@ -157,12 +157,14 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
     ctx.fillText('🪶', W / 2, imgY + imgDrawH / 2)
   }
 
-  // Bottom gradient — blends image into info surface color
-  const blendGrad = ctx.createLinearGradient(0, imgY + imgDrawH * 0.90, 0, imgY + imgDrawH)
-  blendGrad.addColorStop(0, `${tier.surface}00`)
-  blendGrad.addColorStop(1, `${tier.surface}E0`)
-  ctx.fillStyle = blendGrad
-  ctx.fillRect(imgX, imgY, imgW, imgDrawH)
+  // Shelf line — hard cut between image and info
+  ctx.restore()
+  ctx.strokeStyle = `${tier.accent}60`
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(0, infoY + 1)
+  ctx.lineTo(W, infoY + 1)
+  ctx.stroke()
 
   // Serial pill — top-left of image
   const serial = `#${String(bird.serialNumber).padStart(3, '0')}`
@@ -176,8 +178,6 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
   ctx.fill()
   ctx.fillStyle = '#E8E8E8'
   ctx.fillText(serial, imgX + 24, imgY + 14 + 21)
-
-  ctx.restore()
 
   // ── Info section ──
   const infoX = PAD
