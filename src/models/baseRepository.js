@@ -37,6 +37,10 @@ class BaseRepository {
     const result = await obj.save();
     return result;
   }
+
+  async update(query, updateObj, options = {}) {
+    return this.model.findOneAndUpdate(query, updateObj, { new: true, ...options });
+  }
 }
 
 export default BaseRepository;

@@ -82,8 +82,11 @@ test/
 
 # Any other files or directories you want to ignore
 run.dev.sh
+run.template.sh
 public/images/birds
 .DS_Store
 reference/*
 graphify-out/
 .claude/
+
+DataCollector/logs/*

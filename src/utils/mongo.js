@@ -13,8 +13,8 @@ const connectToDatabase = () => {
 
   const db = mongoose.connection;
 
-  db.on('error', (err) => logger.error(`mongoDB connection error: ${err}`));
-  db.once('open', () => logger.info('mongoDB connected'));
+  db.on('error', (err) => logger.error(`❌ MongoDB connection error: ${err}`));
+  db.once('open', () => logger.info('🍃 MongoDB connected'));
   return db;
 };
 

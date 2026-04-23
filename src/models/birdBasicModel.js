@@ -27,6 +27,8 @@ const schema = new mongoose.Schema(
     size: { type: String, enum: ['tiny', 'small', 'medium', 'large', 'very large'] },
     sizeRange: { type: String },
     diet: { type: [String] },
+    speciesCode: { type: String },
+    verification: { type: mongoose.Schema.Types.Mixed },
   },
   {
     timestamps: {

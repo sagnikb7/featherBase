@@ -45,6 +45,13 @@ const config = convict({
       arg: 'mongo_db',
     },
   },
+  adminToken: {
+    doc: 'secret token required for admin write operations',
+    format: String,
+    default: '',
+    env: 'ADMIN_TOKEN',
+    arg: 'admin_token',
+  },
 });
 
 config.validate({ allowed: 'strict' });

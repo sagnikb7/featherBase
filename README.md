@@ -12,7 +12,7 @@ Currently tracks **510 species** across 51 batch files, with data sourced from W
 
 | Tool | Version |
 |------|---------|
-| Node.js | 20+ |
+| Node.js | 22+ |
 | pnpm | 9+ |
 | MongoDB | Atlas or local instance |
 | Python 3 | Only needed for data collection scripts |
@@ -32,29 +32,30 @@ cd web && pnpm install
 Copy the template and fill in your values:
 
 ```bash
-cp run.template.sh run.dev.sh
+cp .env.template .env
 ```
 
-Edit `run.dev.sh` with your `MONGO_DB` connection string. This file is gitignored.
+Edit `.env` with your `MONGO_DB` connection string. This file is gitignored. Environment variables are loaded via Node's native `--env-file` flag — no dotenv package required.
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
 | `PORT` | Server port | `8888` |
 | `MONGO_DB` | MongoDB connection string | — |
-| `DEBUG` | Verbose error stacks in responses | `false` |
+| `ADMIN_TOKEN` | Bearer token for admin write endpoints | — |
+| `DEBUG` | Sets log level to `debug` and includes error stacks in API error responses | `false` |
 | `VITE_IMG_DELIVERY_MODE` | `online` (GitHub Pages CDN) or `offline` (local `/public/images/birds`) | `online` |
 
 ### 3. Run
 
 ```bash
-# Full stack (builds frontend + starts API with nodemon)
-./run.dev.sh
+# Backend + frontend together
+pnpm dev
 
-# API only (requires env vars already exported)
-pnpm start:local
+# Backend only (Node --watch, reads .env)
+pnpm dev:BE
 
-# Frontend dev server only (hot reload, proxies API to localhost:8888)
-cd web && pnpm dev
+# Frontend only (Vite, hot reload, proxies API to localhost:8888)
+pnpm dev:FE
 ```
 
 ---
@@ -67,7 +68,7 @@ featherBase/
 ├── netlify.toml             # Netlify build config + API redirects
 ├── netlify/functions/
 │   └── api.mjs              # Serverless function wrapping Express via serverless-http
-├── run.template.sh          # Environment template (copy to run.dev.sh)
+├── .env.template            # Environment template (copy to .env)
 ├── package.json             # Backend deps + scripts, subpath import aliases
 │
 ├── src/                     # ── Backend ──
@@ -91,7 +92,8 @@ featherBase/
 │   ├── constants/            # API status codes, error messages
 │   ├── utils/                # Logger (Winston), MD5 hashing, Mongo connection
 │   └── scripts/
-│       └── insert-birds.js   # Bulk insert from data/birds/ into MongoDB
+│       ├── insert-birds.js   # Bulk insert from data/birds/ into MongoDB
+│       └── verify-birds.js   # Cross-reference DB records against eBird CSV
 │
 ├── data/birds/              # Bird data (51 batch JSON files, 10 birds each)
 │
@@ -175,6 +177,18 @@ Alternatively, deploy on **Render** using `render.yaml` at the project root — 
 
 1. **Extract bird names** — Python scrapers in `DataCollector/` pull from Wikipedia and dibird.com
 2. **Generate bird data** — Feed batches of 10 names to an LLM using the prompt in [`DataCollector/prompt.txt`](DataCollector/prompt.txt), save as `data/birds/<n>.json`
-3. **Insert into MongoDB** — `src/scripts/insert-birds.js` transforms fields, deduplicates by scientific name, and bulk-inserts with sequential serial numbers
+3. **Insert into MongoDB** — transforms fields, deduplicates by scientific name, and bulk-inserts with sequential serial numbers
+
+```bash
+pnpm insert-birds "56-60"        # insert batch files 56.json through 60.json
+pnpm insert-birds "[56,58,60]"   # insert specific batch files
+```
+
+4. **Verify against eBird** — cross-references DB records against `DataCollector/ebird.csv`, corrects `scientificName`, `order`, `family`, `commonGroup`, sets `speciesCode`, and writes a `verification` field per record. Logs written to `DataCollector/logs/verify-<ts>.json`.
+
+```bash
+pnpm verify-birds "1-10"         # verify serial numbers 1 through 10
+pnpm verify-birds "[23,56,67]"   # verify specific serial numbers
+```
 
 > **Note on data origin:** All bird data in this database is **AI-generated** using the prompt in `DataCollector/prompt.txt` — it is not scraped or copied from any third-party source. Because it is LLM-generated, some fields (IUCN status, distribution, sighting hotspots) may contain inaccuracies. Always cross-check critical data against authoritative sources such as the IUCN Red List or eBird.

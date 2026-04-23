@@ -1,6 +1,7 @@
 import NodeCache from 'node-cache';
 import birdModel from '#models/birdBasicModel.js';
 import metaModel from '#models/metaModel.js';
+import { CONSTANTS } from '#constants/common.js';
 
 const cache = new NodeCache({ stdTTL: 3600 });
 
@@ -13,10 +14,10 @@ const getBirdById = async (id) => {
   }
 
   const [metaData] = await metaModel.get({ serialNumber: id });
-  const CDN_BASE = 'https://sagnikb7.github.io/featherbase-images/assets/images/optimised_birds';
+  const { IMAGES_BASE } = CONSTANTS.cdn;
   const images = (metaData?.images || []).map(({ file, tags }) => ({
     file: file || null,
-    cdn: file ? `${CDN_BASE}/${file}` : null,
+    cdn: file ? `${IMAGES_BASE}/${file}` : null,
     tags,
   }));
   return { ...data, meta: { images } };
@@ -88,4 +89,32 @@ const getGroups = async () => {
   return result;
 };
 
-export { getBirdById, getAllBirds, getGroups };
+// Allowed top-level fields that callers may patch on a bird document
+const PATCHABLE_FIELDS = new Set([
+  'name', 'scientificName', 'iucnStatus', 'habitat', 'distributionRangeSize',
+  'bestSeenAt', 'migrationStatus', 'order', 'family', 'commonGroup', 'rarity',
+  'identification', 'colors', 'size', 'sizeRange', 'diet', 'speciesCode', 'verification',
+]);
+
+const updateBird = async (serialNumber, patch) => {
+  const $set = {};
+
+  for (const [key, value] of Object.entries(patch)) {
+    if (!PATCHABLE_FIELDS.has(key)) continue;
+
+    // verification is merged at sub-key level to avoid wiping sibling keys
+    if (key === 'verification' && typeof value === 'object' && value !== null) {
+      for (const [subKey, subValue] of Object.entries(value)) {
+        $set[`verification.${subKey}`] = subValue;
+      }
+    } else {
+      $set[key] = value;
+    }
+  }
+
+  if (Object.keys($set).length === 0) return null;
+
+  return birdModel.update({ serialNumber }, { $set });
+};
+
+export { getBirdById, getAllBirds, getGroups, updateBird };

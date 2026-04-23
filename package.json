@@ -1,7 +1,7 @@
 {
   "name": "feather-base",
-  "version": "0.1.2",
-  "description": "birds db with other features",
+  "version": "0.1.3",
+  "description": "Pokédex-style database and visual explorer of Indian bird species",
   "type": "module",
   "imports": {
     "#src/*": "./src/*",
@@ -19,21 +19,28 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "start:local": "nodemon index.js",
-    "start:debug": "./run.local.sh",
-    "dev": "concurrently \"./run.dev.sh\" \"cd web && pnpm dev\" --names backend,frontend --prefix-colors blue,magenta",
-    "dev:backend": "./run.dev.sh",
-    "dev:frontend": "cd web && pnpm dev",
+    "dev:BE": "node --env-file=.env --watch index.js",
+    "dev:FE": "cd web && pnpm dev",
+    "dev": "concurrently \"node --env-file=.env index.js\" \"cd web && pnpm dev\" --names backend,frontend --prefix-colors blue,magenta",
+    "verify-birds": "node --env-file=.env src/scripts/verify-birds.js",
+    "insert-birds": "node --env-file=.env src/scripts/insert-birds.js",
     "lint:fix": "eslint 'index.js' 'src/**/*.js?(x)' --fix",
     "prepare": "husky",
     "build:FE": "cd web && npx pnpm@latest i && npx pnpm@latest build"
   },
   "keywords": [
     "birds",
-    "database"
+    "india",
+    "database",
+    "mongodb",
+    "express",
+    "vue"
   ],
   "author": "Sagnik B",
   "license": "ISC",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "connect-timeout": "^1.9.0",
     "convict": "^6.2.4",
@@ -47,13 +54,10 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9.29.0",
     "concurrently": "^9.2.1",
     "eslint": "^9.29.0",
-    "eslint-config-airbnb-base": "^15.0.0",
     "globals": "^17.4.0",
-    "husky": "^9.1.7",
-    "nodemon": "^3.1.10"
+    "husky": "^9.1.7"
   }
 }

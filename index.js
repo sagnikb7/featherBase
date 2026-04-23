@@ -14,27 +14,26 @@ if (mode === 'server') {
 
   const httpServer = createServer(app);
   httpServer.listen(PORT, () => {
-    logger.info(`API server [STARTED] at PORT:${PORT}`);
+    logger.info(`🚀 API server running → http://localhost:${PORT}`);
   });
 }
 
 process.on('uncaughtException', (err) => {
-  logger.error(err);
-  logger.info('uncaughtException : shutting down server');
+  logger.error(`💥 Uncaught exception — shutting down: ${err.message}`);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
-  logger.error(`unhandledRejection: ${reason}`);
+  logger.error(`💥 Unhandled rejection — shutting down: ${reason}`);
   process.exit(1);
 });
 
 process.on('SIGTERM', () => {
-  logger.info('Shutting down');
+  logger.info('🛑 SIGTERM received — shutting down gracefully');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  logger.info('Shutting down');
+  logger.info('🛑 SIGINT received — shutting down gracefully');
   process.exit(0);
 });

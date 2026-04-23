@@ -2,11 +2,12 @@ import express from 'express';
 import helmet from 'helmet';
 import timeout from 'connect-timeout';
 import lgr from '#logger';
+import { CONSTANTS } from '#constants/common.js';
 
 const logger = lgr('basic mw');
 
 const basicMiddleware = (app) => {
-  logger.info('adding basic middlewares');
+  logger.info('🔧 Registering core middlewares');
 
   app.use(timeout('30s'));
   app.use(
@@ -19,7 +20,7 @@ const basicMiddleware = (app) => {
           imgSrc: [
             "'self'",
             'data:',
-            'https://sagnikb7.github.io',
+            CONSTANTS.cdn.HOST_URL,
           ],
           connectSrc: ["'self'"],
           fontSrc: ["'self'", 'https:', 'data:'],

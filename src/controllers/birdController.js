@@ -1,6 +1,7 @@
-import { getBirdById, getAllBirds, getGroups } from '#services/birdService.js';
+import { getBirdById, getAllBirds, getGroups, updateBird } from '#services/birdService.js';
+import { CONSTANTS } from '#constants/common.js';
 
-const ALLOWED_IMAGE_HOSTS = ['sagnikb7.github.io'];
+const ALLOWED_IMAGE_HOSTS = [CONSTANTS.cdn.HOST];
 
 const getBirdsController = async (req, res, next) => {
   try {
@@ -70,4 +71,20 @@ const imageProxyController = async (req, res, next) => {
   }
 };
 
-export { getBirdsController, getAllBirdsController, getGroupsController, imageProxyController };
+const updateBirdController = async (req, res, next) => {
+  try {
+    const { id } = req.validated?.params || req.params;
+    const result = await updateBird(Number(id), req.body);
+    if (!result) {
+      return res.status(404).json({ success: false, message: 'Bird not found or no valid fields provided' });
+    }
+    return res.json({ success: true, data: result });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export {
+  getBirdsController, getAllBirdsController, getGroupsController,
+  imageProxyController, updateBirdController,
+};

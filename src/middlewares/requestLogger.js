@@ -30,13 +30,14 @@ const loggingMiddleware = (req, res, next) => {
     reqLog.BODY = bodyLog;
   }
 
-  logger.info(reqLog);
+  logger.info({ ...reqLog, message: `→ ${req.method} ${req.originalUrl}` });
 
-  // Log response status and headers DISABLE
   res.on('finish', () => {
-    const resLog = { REQ_ID: req.id, TYPE: 'res', STATUS: res.statusCode };
+    const status = res.statusCode;
+    const emoji = status >= 500 ? '💥' : status >= 400 ? '⚠️' : '✅';
+    const resLog = { REQ_ID: req.id, TYPE: 'res', STATUS: status };
     if (ENABLE_RES_HEADER_LOGGING) resLog.RES_HEADERS = res.getHeaders();
-    logger.info(resLog);
+    logger.info({ ...resLog, message: `${emoji} ${status} ← ${req.method} ${req.originalUrl}` });
   });
 
   return next();

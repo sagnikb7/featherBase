@@ -5,7 +5,7 @@ import lgr from '#logger';
 const logger = lgr('error mw');
 
 const errorMiddleware = (app, debug) => {
-  logger.info('adding error middlewares');
+  logger.info('🔧 Registering error handlers');
 
   app.use((_req, res) => {
     res.status(404).json({

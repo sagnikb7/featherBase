@@ -8,31 +8,40 @@ FeatherBase is a Pokédex-style database of Indian bird species. Each bird has a
 
 ## Commands
 
-- **Run locally:** `pnpm start:local` (uses nodemon for auto-reload)
-- **Run production:** `pnpm start`
-- **Frontend dev server:** `cd web && pnpm dev` (Vite on port 8000, proxies `/v1.0/*` and `/_health` to localhost:8888)
-- **Lint & fix:** `pnpm lint:fix` (ESLint with airbnb-base, also runs as pre-commit hook via Husky)
+- **Backend only (watch):** `pnpm dev:BE` (Node `--watch` + `.env`)
+- **Frontend only:** `pnpm dev:FE` (Vite on port 8000, proxies `/v1.0/*` and `/_health` to localhost:8888)
+- **Full dev:** `pnpm dev` (backend + frontend via concurrently, backend without `--watch`)
+- **Production:** `pnpm start` (env from platform, no `.env`)
 - **Build frontend:** `pnpm build:FE` (runs pnpm install + build inside `web/`)
+- **Lint & fix:** `pnpm lint:fix` (ESLint with airbnb-base, also runs as pre-commit hook via Husky)
+- **Verify birds:** `pnpm verify-birds "1-10"` or `pnpm verify-birds "[23,56,67]"`
+- **Insert birds:** `pnpm insert-birds "56-60"` or `pnpm insert-birds "[56,58,60]"`
 
 There are no tests configured.
 
 ## Environment Variables
 
-Configured via `convict` in `src/config.js`. Key vars: `PORT` (default 8888), `NODE_ENV`, `MONGO_DB` (connection string), `MODE` (server), `DEBUG`, `SERVICE_NAME`.
+Configured via `convict` in `src/config.js`. Loaded from `.env` via Node's native `--env-file` flag (no dotenv package). Copy `.env.template` → `.env` and fill in values. Key vars: `PORT` (default 8888), `NODE_ENV`, `MONGO_DB` (connection string), `MODE` (server), `DEBUG`, `SERVICE_NAME`, `ADMIN_TOKEN` (secret for admin write endpoints — generate with `openssl rand -hex 32`, pass as `Authorization: Bearer <token>` or `X-Admin-Token` header).
 
 ## Architecture
 
 - **ES Modules** throughout (`"type": "module"` in package.json)
 - **Path aliases** via Node.js subpath imports: `#config`, `#logger`, `#models/*`, `#services/*`, `#controllers/*`, `#middlewares/*`, `#routes/*`, `#utils/*`, `#validators/*`
+- **Logger:** `src/utils/logger.js` — Winston-based, file-namespaced via `loggerManager(file)`. In development: colorized single-line pretty format `[HH:mm:ss] level (file) message`. In production (`NODE_ENV=production`): compact JSON `{ time, level, msg, file, meta? }` (meta key omitted when absent). Log level is `debug` when `DEBUG=true`, otherwise `info`. Request logger emits `→ METHOD /path` on ingress and `✅/⚠️/💥 STATUS ← METHOD /path` on response finish.
 - **Layered architecture:** Routes (`src/routes/`) -> Joi validation middleware (`src/middlewares/apiValidator.js`) -> Controllers (`src/controllers/`) -> Services (`src/services/`) -> Models (`src/models/`)
-- **BaseRepository pattern:** `src/models/baseRepository.js` wraps Mongoose with `get()`, `getOne()`, `create()`, `aggregate()`. Individual models (e.g., `birdBasicModel.js`, `metaModel.js`) extend it.
+- **BaseRepository pattern:** `src/models/baseRepository.js` wraps Mongoose with `get()`, `getOne()`, `create()`, `aggregate()`, `update()`. `update(query, updateObj, options)` uses `findOneAndUpdate` and returns the updated document. Individual models (e.g., `birdBasicModel.js`, `metaModel.js`) extend it.
+- **Constants:** shared backend constants live in `src/constants/common.js` under the `CONSTANTS` object. CDN values (`cdn.HOST`, `cdn.HOST_URL`, `cdn.IMAGES_BASE`) are the single source of truth used by the service, controller, and Helmet CSP — never hardcode the GitHub Pages URL again.
 - **API base path:** `/v1.0/birds` - routes defined in `src/routes/birdRouter.js`
 - **API search:** `GET /v1.0/birds?search=<term>` does case-insensitive regex on `name` and `scientificName`. The list endpoint returns `{ id, serialNumber, name, scientificName, commonGroup }` — no images (meta join skipped for performance).
 - **Groups API:** `GET /v1.0/birds/groups` returns `{ title: string, count: number }[]` sorted by count descending (uses MongoDB aggregation, not `distinct`). Frontend renders count badges on group chips.
+- **Admin update API:** `PATCH /v1.0/birds/:id` — requires `Authorization: Bearer <ADMIN_TOKEN>` or `X-Admin-Token` header. Body is a partial bird object; only fields in `PATCHABLE_FIELDS` (defined in `birdService.js`) are applied. The `verification` field is merged at sub-key level via dot-notation so sibling keys are never overwritten. Returns 401 if token is missing/wrong, 503 if `ADMIN_TOKEN` env var is not set.
+- **Admin auth middleware:** `src/middlewares/adminAuth.js` — checks the token and short-circuits with the appropriate status code.
 - **Frontend:** Vue 3 + Vite + UnoCSS app in `web/`, built output served as static files from `web/dist/`. Uses file-based routing (unplugin-vue-router), auto-imports (unplugin-auto-import), and Phosphor icons (@iconify-json/ph).
-- **Middleware chain** (in order): timeout (30s), Helmet (CSP whitelists GitHub Pages CDN `sagnikb7.github.io`), body parsers, request logger, routes, 404 handler, error handler. Sentry was removed — re-add when needed.
-- **Data pipeline:** Bird data is generated via LLM prompts (see README), stored as JSON in `data/birds/`, and bulk-inserted via `src/scripts/insert-birds.js`
+- **Middleware chain** (in order): timeout (30s), Helmet (CSP whitelists GitHub Pages CDN via `CONSTANTS.cdn.HOST_URL`), body parsers, request logger, routes, 404 handler, error handler. Sentry was removed — re-add when needed.
+- **Data pipeline:** Bird data is generated via LLM prompts (see README), stored as JSON in `data/birds/`, and bulk-inserted via `src/scripts/insert-birds.js`. Run with `pnpm insert-birds` (uses `.env`) — the connect/run block is guarded by an ESM main-module check so importing the file elsewhere is safe.
 - **Image delivery:** Dual mode via `VITE_IMG_DELIVERY_MODE` — `online` constructs GitHub Pages CDN URLs from the `file` field in the meta collection (`https://sagnikb7.github.io/featherbase-images/assets/images/optimised_birds/<file>`), `offline` serves from `public/images/birds/` (gitignored). The API response exposes `cdn` (not `url`) on each image object; `cdn` is `null` if `file` is missing. Images are only loaded on the detail page, not the list.
+- **Bird schema notable fields:** `speciesCode` (eBird species code, string), `verification` (schema-less `Mixed` JSON — sub-keys written via dot-notation to prevent sibling overwrites). Verification shape per sub-key: `{ verified: boolean, date: "YYYY-MM-DD" }` for matches; `{ verified: false, mismatch: { db, csv }, date }` for conflicts.
+- **eBird verification script:** `src/scripts/verify-birds.js` — cross-references DB records against `DataCollector/ebird.csv`. Sets `speciesCode`, verifies/corrects `scientificName`, `order`, `family`, `commonGroup`, and writes the `verification` field. Run as `pnpm verify-birds "34-67"` (range) or `pnpm verify-birds "[23,56,67]"` (array). Logs written to `DataCollector/logs/verify-<ts>.json`.
 
 ## Deployment
 
@@ -110,6 +119,27 @@ The app is installable as a Progressive Web App:
 - `web/public/logo.svg` — maskable icon (forest green background, mint feather)
 - Cache name: `featherbase-v1` — bump the version to invalidate on deploy
 
+## verify-birds Workflow
+
+When asked to run `pnpm verify-birds` for any range:
+
+1. Run the script and let it complete.
+2. Parse the output log (`DataCollector/logs/verify-<ts>.json`) — filter for `matchMethod === "failed"`.
+3. For each failed bird, look it up in `DataCollector/ebird.csv` (grep by partial scientific name or common name) to find the current eBird accepted name.
+4. Update `DataCollector/retry.json` (array of objects) using a `node -e` one-liner — never use the Edit tool on JSON files. Each entry shape:
+   ```json
+   {
+     "serialNumber": 54,
+     "dbName": "Grey Francolin",
+     "dbScientificName": "Francolinus pondicerianus",
+     "correctScientificName": "Ortygornis pondicerianus",
+     "notes": "..."
+   }
+   ```
+   To add entries: read the file, parse, push new objects, `JSON.stringify` back and write. To remove a resolved entry: filter by `serialNumber`, write back.
+5. Report a summary to the user: counts of matched/failed, list of failures with the eBird-correct scientific name and what changed, and any notable auto-corrections (commonName fallback matches).
+6. Do NOT re-run the script automatically — wait for the user to fix the DB entries for failed birds first.
+
 ## Git Rules
 
 - NEVER push to remote without explicit user approval. Commit locally and wait for review.
@@ -121,7 +151,7 @@ The app is installable as a Progressive Web App:
 
 ## Lint Rules
 
-ESLint with airbnb-base. Max line length: 120 chars. `import/no-unresolved` and `import/extensions` are disabled (needed for subpath imports).
+ESLint with `@eslint/js` recommended rules. Max line length: 120 chars. `prefer-const` and `no-var` enforced. `no-unused-vars` allows `_`-prefixed args.
 
 ## graphify
 
