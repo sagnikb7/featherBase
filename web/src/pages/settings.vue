@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { Theme } from '~/composables'
-import { fireUnlockConfetti, unlockMidnight } from '~/composables'
+import { fireUnlockConfetti, unlockMidnight, usePwaInstall } from '~/composables'
 
-const themeOptions: { value: Theme; label: string; description: string; icon: string }[] = [
+const { showInstallCard, isIOS, installApp } = usePwaInstall()
+
+const themeOptions: { value: Theme, label: string, description: string, icon: string }[] = [
   { value: 'light', label: 'Light', description: 'Always use light mode', icon: 'i-ph-sun-duotone' },
   { value: 'dark', label: 'Dark', description: 'Always use dark mode', icon: 'i-ph-moon-duotone' },
   { value: 'auto', label: 'Auto', description: 'Follow system preference', icon: 'i-ph-device-mobile-duotone' },
@@ -14,9 +16,26 @@ const spreading = ref(false)
 const spreadResult = ref<'idle' | 'pending' | 'success' | 'error'>('idle')
 
 const clearing = ref(false)
+const cacheSize = ref<string | null>(null)
+
+async function loadCacheSize() {
+  if (!navigator.storage?.estimate)
+    return
+  const { usage } = await navigator.storage.estimate()
+  if (usage == null)
+    return
+  cacheSize.value = usage < 1024 * 1024
+    ? `${(usage / 1024).toFixed(1)} KB`
+    : `${(usage / (1024 * 1024)).toFixed(1)} MB`
+}
+
+onMounted(() => {
+  loadCacheSize()
+})
 
 async function clearCache() {
-  if (clearing.value) return
+  if (clearing.value)
+    return
   clearing.value = true
   try {
     const keys = await caches.keys()
@@ -37,7 +56,8 @@ function confirmShare() {
 }
 
 async function spreadTheWord() {
-  if (spreading.value) return
+  if (spreading.value)
+    return
   spreading.value = true
   spreadResult.value = 'idle'
   try {
@@ -108,7 +128,7 @@ async function spreadTheWord() {
         <button
           v-if="settings.midnightUnlocked"
           class="theme-option theme-option--midnight"
-          :class="{ active: settings.theme === 'midnight', 'midnight-just-unlocked': spreadResult === 'success' }"
+          :class="{ 'active': settings.theme === 'midnight', 'midnight-just-unlocked': spreadResult === 'success' }"
           @click="setTheme(midnightOption.value)"
         >
           <div class="midnight-shimmer" aria-hidden="true" />
@@ -137,7 +157,9 @@ async function spreadTheWord() {
               <div i-ph-paper-plane-tilt-duotone class="spread-icon" />
             </div>
             <div class="spread-text">
-              <p class="spread-title">Spread the Word</p>
+              <p class="spread-title">
+                Spread the Word
+              </p>
               <p class="spread-desc">
                 Share today's featured bird as a card. Unlock the <strong>Midnight</strong> theme as a thank you.
               </p>
@@ -169,6 +191,31 @@ async function spreadTheWord() {
         </div>
       </section>
 
+      <section v-if="showInstallCard" class="settings-section">
+        <h2 class="settings-section-title">
+          <div i-ph-device-mobile-duotone class="settings-section-icon" />
+          Install
+        </h2>
+        <div class="settings-card">
+          <div class="settings-row install-row">
+            <div class="install-row-label">
+              <div i-ph-device-mobile-camera-duotone class="install-row-icon" />
+              <div>
+                <p class="install-row-title">
+                  Add to Home Screen
+                </p>
+                <p class="install-row-sub">
+                  {{ isIOS ? 'Safari: Share → Add to Home Screen' : 'Full-screen · offline · instant launch' }}
+                </p>
+              </div>
+            </div>
+            <button v-if="!isIOS" class="install-pill-btn" @click="installApp">
+              Install
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section class="settings-section">
         <h2 class="settings-section-title">
           <div i-ph-hard-drives-duotone class="settings-section-icon" />
@@ -180,9 +227,14 @@ async function spreadTheWord() {
               <div i-ph-broom-duotone class="spread-icon cache-icon" />
             </div>
             <div class="spread-text">
-              <p class="spread-title">Clear Cache</p>
+              <p class="spread-title">
+                Clear Cache
+              </p>
               <p class="spread-desc">
                 Something feel off? A fresh start usually fixes it.
+              </p>
+              <p v-if="cacheSize" class="cache-size-label">
+                {{ cacheSize }} cached
               </p>
             </div>
           </div>

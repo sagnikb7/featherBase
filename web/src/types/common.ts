@@ -20,6 +20,8 @@ export interface Bird {
   size: string
   sizeRange: string
   diet: string[]
+  speciesCode?: string
+  verification?: Record<string, unknown>
   created_at: string
   updated_at: string
   __v: number

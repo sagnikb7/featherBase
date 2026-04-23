@@ -38,8 +38,10 @@ window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change', (
 })
 
 export const isDark = computed(() => {
-  if (settings.theme === 'dark' || settings.theme === 'midnight') return true
-  if (settings.theme === 'light') return false
+  if (settings.theme === 'dark' || settings.theme === 'midnight')
+    return true
+  if (settings.theme === 'light')
+    return false
   return systemDark.value
 })
 

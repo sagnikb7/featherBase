@@ -72,7 +72,8 @@ Configured via `convict` in `src/config.js`. Loaded from `.env` via Node's nativ
 - **Page transitions:** Vue `<Transition>` with fade + drift, respects `prefers-reduced-motion`
 - **IUCN status chips:** colored dot + code + label, pulse animation on critical statuses
 - **Group color hashing:** `web/src/composables/groupColor.ts` — deterministic djb2 hash maps `commonGroup` names to a 10-color earthy palette. Same color on list and detail pages.
-- **Home page:** inline hero header (logo + title + tagline), bird-of-the-day card (seeded by `Math.floor(Date.now() / 86400000) % total`), compact Pokédex-style rows (no images), API-powered search with debounced dropdown (300ms, 3+ chars), group filter chips (up to 8, seeded-shuffled daily so they rotate without being random per visit). Search dropdown is `position: absolute` on all screen sizes — no mobile bottom-sheet override.
+- **Home page:** inline hero header (logo + title + tagline), bird-of-the-day card (seeded by `Math.floor(Date.now() / 86400000) % total`), compact Pokédex-style rows (no images), API-powered search with debounced dropdown (300ms; triggers at 1 char for pure-numeric queries, 3 chars for text), group filter chips (up to 8, seeded-shuffled daily so they rotate without being random per visit). Search dropdown is `position: absolute` on all screen sizes — no mobile bottom-sheet override.
+- **Bird list row layout:** name on the first line (full width); second line shows `#0001 · Scientific name` inline — serial in mono, separator `·`, then italic scientific name. Group tag visible on desktop (≥640px), hidden on mobile to prevent cramping. The `--row-accent` / `--row-accent-bg` CSS custom properties carry the group color onto the row hover state regardless.
 - **Serial format:** `formatSerial()` in `web/src/composables/format.ts` — 4-digit zero-padded (`#0001`, not `#001`)
 - **Detail page:** image carousel with swipe support, dot indicators, image tags (adult/juvenile/male/female — "default" tag hidden). Prev/next bird navigation is in the intro panel, not on the image. Share button is a full-width `.bird-share-cta` CTA below the identity block (not inline in the nav row). Loader is animated dots, not the feather SVG.
 - **Panel backgrounds:** accent-tinted (5% forest green in light, 6% mint in dark) with `--surface-gradient` overlay and a 2px accent-derived top border — branded surface, not generic gray.
@@ -89,9 +90,10 @@ Configured via `convict` in `src/config.js`. Loaded from `.env` via Node's nativ
 
 ### Settings page
 - Route: `/settings` — `web/src/pages/settings.vue`
-- Sections: Appearance (theme picker), "Spread the Word" unlock card (hidden once midnight is unlocked), Storage (clear cache), About (app info + GitHub link)
+- **Section order:** Appearance → Community (hidden after midnight unlock) → Install (hidden when already installed/standalone) → Storage → About
 - Theme picker: 3-column grid for light/dark/auto; midnight is a full-width special row with shimmer animation (`.theme-option--midnight`), hidden until unlocked
-- **Clear Cache button** (Storage section): deletes all Cache Storage entries, unregisters the service worker, then reloads — re-registers the SW fresh. Amber-toned, uses the spread-card pattern. Copy is intentionally non-technical ("Something feel off? A fresh start usually fixes it.")
+- **Install section** (`composables/pwaInstall.ts`): `beforeinstallprompt` is captured in `App.vue` on mount (module-level singleton so it survives navigation). On Android/Chrome/Edge shows a compact `settings-card` row with an "Install" pill button that triggers the native dialog. On iOS shows the same row with a "Safari: Share → Add to Home Screen" hint. Section hidden when `display-mode: standalone` or `appinstalled` fires.
+- **Clear Cache button** (Storage section): deletes all Cache Storage entries, unregisters the service worker, then reloads — re-registers the SW fresh. Also shows live cache size via `navigator.storage.estimate()`. Amber-toned, uses the spread-card pattern.
 - Styles: `web/src/styles/components/settings.css`
 
 ### Rarity system
@@ -114,10 +116,11 @@ Configured via `convict` in `src/config.js`. Loaded from `.env` via Node's nativ
 
 The app is installable as a Progressive Web App:
 - `web/public/manifest.json` — app manifest with name, theme color, icons
-- `web/public/sw.js` — service worker with cache-first for static assets, network-first for API calls
+- `web/public/sw.js` — two caches: `featherbase-v3` (static assets, cache-first) and `featherbase-api-v3` (API responses). Bump both version suffixes to force a full cache wipe on deploy.
 - `web/public/favicon.svg` — feather logo (adapts to dark mode via `prefers-color-scheme`)
 - `web/public/logo.svg` — maskable icon (forest green background, mint feather)
-- Cache name: `featherbase-v1` — bump the version to invalidate on deploy
+- **Caching strategy:** home-page API routes (groups, bird-by-id, bird list without search) use stale-while-revalidate with a 5-min TTL — navigating away and back does not re-hit the API. Search results are always network-first. On SW activation, `navigator.storage.estimate()` is checked; if total origin usage exceeds 50 MB the API cache is flushed automatically.
+- **Install prompt:** `web/src/composables/pwaInstall.ts` captures `beforeinstallprompt` in `App.vue` on mount. Settings page exposes an Install section (hidden when already in standalone mode).
 
 ## verify-birds Workflow
 

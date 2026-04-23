@@ -155,13 +155,10 @@ watch(
         :colors="currentBird.colors"
         class="bird-detail-img-contain"
       />
-      <BirdImage
-        v-else
-        src=""
-        :alt="currentBird.name"
-        :colors="currentBird.colors"
-        class="bird-detail-img-contain"
-      />
+      <div v-else class="bird-no-photo">
+        <div i-ph-camera-slash class="bird-no-photo-icon" />
+        <span class="bird-no-photo-label">No photo</span>
+      </div>
 
       <div v-if="visibleTags(images[activeImage] || {}).length" class="image-tags">
         <span v-for="tag in visibleTags(images[activeImage])" :key="tag" class="image-tag">
@@ -255,6 +252,10 @@ watch(
         >
           <span i-ph-star-fill class="rarity-star" />
           {{ getRarity(currentBird.rarity).label }}
+        </span>
+        <span v-if="!currentBird.verification" class="unverified-chip" title="This record hasn't been cross-checked against eBird yet">
+          <span i-ph-warning class="unverified-icon" />
+          Unverified
         </span>
       </div>
 

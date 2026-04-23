@@ -393,6 +393,58 @@
   animation: spread-success-in 0.25s ease both;
 }
 
+/* ── Install row (compact settings-card style) ── */
+.install-row {
+  gap: var(--space-3);
+}
+
+.install-row-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.install-row-icon {
+  font-size: 20px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.install-row-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 2px;
+}
+
+.install-row-sub {
+  font-size: 11px;
+  color: var(--color-text-faint);
+  margin: 0;
+}
+
+.install-pill-btn {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.install-pill-btn:hover {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
 /* ── Cache clear button ── */
 .cache-icon-wrap {
   background: rgba(180, 120, 60, 0.1);
@@ -417,6 +469,14 @@
 
 .cache-btn-spinning {
   animation: spin 0.8s linear infinite;
+}
+
+.cache-size-label {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-faint);
+  opacity: 0.7;
 }
 
 /* ── Made with love footer ── */

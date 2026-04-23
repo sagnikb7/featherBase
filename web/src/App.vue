@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import BottomNav from '~/components/BottomNav.vue'
+import { usePwaInstall } from '~/composables'
+
+const { initPwaListeners } = usePwaInstall()
+onMounted(() => initPwaListeners())
 </script>
 
 <template>

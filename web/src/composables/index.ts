@@ -1,4 +1,5 @@
 export * from './confetti'
+export * from './pwaInstall'
 export * from './format'
 export * from './settings'
 export * from './groupColor'

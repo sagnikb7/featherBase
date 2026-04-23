@@ -146,8 +146,8 @@ The `search` param (min 3 chars) does case-insensitive matching on `name` and `s
 
 ## Frontend Features
 
-- **Pokédex list** — compact rows with serial number, name, scientific name, and color-coded group tags (no images on list page for fast mobile loading)
-- **API-powered search** — debounced 300ms, shows dropdown with up to 8 results as you type
+- **Pokédex list** — compact rows: name on the first line (full width), `#0001 · Scientific name` on the second. Group color tag visible on desktop, hidden on mobile to maximise name legibility
+- **API-powered search** — debounced 300ms; triggers at 1 character for numeric (serial number) queries, 3 characters for text
 - **Image carousel** — swipe through all images of a species, with dot indicators and tag labels (adult, juvenile, male, etc.)
 - **IUCN status chips** — colored dot + code + label (LC through EX), pulse animation on critical statuses
 - **Group color hashing** — deterministic djb2 hash maps each group name to a 10-color earthy palette, consistent across list and detail views
@@ -156,6 +156,22 @@ The `search` param (min 3 chars) does case-insensitive matching on `name` and `s
 - **Dark mode** — comprehensive token-based theming, toggleable from header or bottom nav
 - **Rarity system** — 5-tier rarity (Common → Legendary) with progressive visual treatment on detail page: colored badge, glow effects, and accent saturation scaling with tier
 - **Trading card share** — "Share" on any bird's detail page generates a 630×880 (rendered at 2×) trading card via Canvas API. Each rarity tier has a distinct deeply-saturated dark background (near-black for Common, rich hues for higher tiers) with a hard cut between image and info panel. Accent color, serial pill, divider, and name progressively adopt the tier accent as rarity increases. Web Share API with PNG download fallback
+- **PWA / installable** — ships a service worker with two caches (`featherbase-v3` for static assets, `featherbase-api-v3` for API responses). Settings → Install section lets users add the app to their home screen (one-tap on Android, guided instructions on iOS). Section auto-hides once installed.
+
+### PWA Caching Strategy
+
+| Route | Strategy | TTL |
+|-------|----------|-----|
+| Static assets (`/assets/*`) | Cache-first | permanent until cache bump |
+| `GET /v1.0/birds/groups` | Stale-while-revalidate | 5 min |
+| `GET /v1.0/birds/:id` | Stale-while-revalidate | 5 min |
+| `GET /v1.0/birds?page=…` (list, no search) | Stale-while-revalidate | 5 min |
+| `GET /v1.0/birds?search=…` | Network-first | none (always fresh) |
+| All other API calls | Network-first | none |
+
+**Stale-while-revalidate** means: if a cached response is under 5 minutes old, return it immediately (zero network latency). If it's older, return the cached copy instantly and fetch a fresh copy in the background for the next request. This is why navigating to Settings and back does not re-hit the API — the home page calls are served from the `featherbase-api-v3` cache.
+
+**50 MB hard limit**: on every SW activation, `navigator.storage.estimate()` is checked. If total origin storage exceeds 50 MB, the entire `featherbase-api-v3` cache is flushed automatically. Static assets in `featherbase-v3` are not affected. Users can also trigger a manual flush via **Settings → Clear Cache**, which deletes all Cache Storage entries and re-registers the SW fresh.
 
 ---
 

@@ -468,14 +468,10 @@
 
 .bird-row-serial {
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  font-size: 11px;
   font-weight: 600;
   color: var(--color-text-faint);
   letter-spacing: 0.04em;
-  flex-shrink: 0;
-  width: 36px;
-  align-self: flex-start;
-  padding-top: 3px;
   transition: color var(--transition-fast);
 }
 
@@ -502,14 +498,21 @@
 }
 
 .bird-row-scientific {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
   font-family: var(--font-serif);
   font-size: var(--text-sm);
   font-style: italic;
   font-weight: 400;
   color: var(--color-text-muted);
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.bird-row-scientific .bird-row-serial {
+  font-style: normal;
+  flex-shrink: 0;
 }
 
 .bird-row-group {
@@ -620,6 +623,10 @@
   .bird-row {
     padding: 14px var(--space-3);
     gap: var(--space-2);
+  }
+
+  .bird-row-group {
+    display: none;
   }
 
   .bird-row-arrow {
