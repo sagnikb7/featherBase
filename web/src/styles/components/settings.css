@@ -244,7 +244,7 @@
   inset: 0;
   background: linear-gradient(105deg, transparent 30%, rgba(167, 139, 250, 0.06) 50%, transparent 70%);
   background-size: 200% 100%;
-  animation: midnight-sheen 3s ease-in-out infinite;
+  animation: midnight-sheen 5s ease-in-out infinite;
   pointer-events: none;
 }
 
