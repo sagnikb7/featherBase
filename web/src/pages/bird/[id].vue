@@ -33,7 +33,10 @@ const sizeDetail = computed(() => {
 const weightDisplay = computed(() => {
   const w = currentBird.value?.weightG
   if (!w) return null
-  return w.min === w.max ? `${w.min} g` : `${w.min}–${w.max} g`
+  const useKg = w.max >= 1000
+  const fmt = (g: number) => useKg ? (g / 1000).toFixed(2) : `${g}`
+  const unit = useKg ? 'kg' : 'g'
+  return w.min === w.max ? `${fmt(w.min)} ${unit}` : `${fmt(w.min)}–${fmt(w.max)} ${unit}`
 })
 
 const wingspanDisplay = computed(() => {

@@ -90,3 +90,4 @@ graphify-out/
 .claude/
 
 DataCollector/logs/*
+data/birdsV2/*
