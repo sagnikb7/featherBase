@@ -131,10 +131,10 @@
 .bird-detail-intro {
   grid-row: 1;
   grid-column: 2;
-  padding: var(--space-6) var(--space-8) var(--space-8);
+  padding: var(--space-8) var(--space-8) var(--space-8);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   overflow-y: auto;
 }
 
@@ -173,15 +173,22 @@
   font-weight: 500;
   cursor: pointer;
   padding: var(--space-2) var(--space-3);
+  min-height: 44px;
   border-radius: var(--radius-full);
   transition:
     color var(--transition-fast),
     background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bird-nav-btn:hover:not(:disabled) {
   color: var(--color-text);
   background: var(--color-accent-light);
+}
+
+.bird-nav-btn:active:not(:disabled) {
+  background: var(--color-bg-muted);
+  color: var(--color-text);
 }
 
 .bird-nav-btn:disabled {
@@ -247,6 +254,10 @@
 .bird-share-cta:hover:not(:disabled) {
   background: var(--color-accent);
   color: var(--color-bg);
+}
+
+.bird-share-cta:active:not(:disabled) {
+  opacity: 0.9;
 }
 
 .bird-share-cta:disabled {
@@ -542,7 +553,6 @@
   background-color: rgba(2, 36, 29, 0.05);
   background-image: var(--surface-gradient);
   border-top: 2px solid rgba(2, 36, 29, 0.08);
-  overflow-y: auto;
 }
 
 .dark .bird-detail-panel {
@@ -618,6 +628,42 @@
 
 .dark .detail-tag {
   background: var(--color-secondary);
+}
+
+.detail-tag--clickable {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  border: none;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.detail-tag--clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.dark .detail-tag--clickable:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.32);
+}
+
+.detail-tag--clickable:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.group-pill-arrow {
+  width: 11px;
+  height: 11px;
+  opacity: 0.7;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.detail-tag--clickable:hover .group-pill-arrow {
+  transform: translateX(2px);
+  opacity: 1;
 }
 
 /* ── Panel headings ── */
@@ -746,4 +792,40 @@
     top: var(--space-3);
     left: var(--space-3);
   }
+}
+
+
+/* ── Version badge (debug) ── */
+.bird-version-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-faint);
+  opacity: 0.45;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-3);
+}
+
+/* ── Size display ── */
+.size-display {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.size-display-category {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text);
+}
+
+.size-display-detail {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--accent, var(--color-accent));
 }

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { baseUrl, formatSerial, groupColor, saveBotdSerial } from '~/composables'
 
+const route = useRoute()
+
 interface GroupEntry { title: string, count: number }
 
 function seededRandom(seed: number) {
@@ -211,6 +213,11 @@ onMounted(() => {
     { rootMargin: '200px' },
   )
 
+  // Pre-select group from query param (e.g. navigating from detail page group pill)
+  const groupFromQuery = route.query.group as string | undefined
+  if (groupFromQuery)
+    selectedGroup.value = groupFromQuery
+
   fetchGroups()
 
   const cachedTotal = localStorage.getItem('featherbase-bird-total')
@@ -255,7 +262,7 @@ onUnmounted(() => {
           id="bird-search"
           v-model="searchQuery"
           type="text"
-          placeholder="Search by name, scientific name or #serial..."
+          placeholder="Search birds, species or #serial…"
           autocomplete="off"
           :disabled="loading"
           @input="onSearchInput"

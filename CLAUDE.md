@@ -16,6 +16,7 @@ FeatherBase is a Pokédex-style database of Indian bird species. Each bird has a
 - **Lint & fix:** `pnpm lint:fix` (ESLint with airbnb-base, also runs as pre-commit hook via Husky)
 - **Verify birds:** `pnpm verify-birds "1-10"` or `pnpm verify-birds "[23,56,67]"`
 - **Insert birds:** `pnpm insert-birds "56-60"` or `pnpm insert-birds "[56,58,60]"`
+- **Upsert birds v2:** `node --env-file=.env src/scripts/upsert-birds-v2.js "42"` or `"41-45"` or `"[41,43]"` — upserts from `data/birdsV2/<N>.json`, batch N → serials (N-1)*10+1…N*10
 
 There are no tests configured.
 
@@ -78,7 +79,11 @@ Configured via `convict` in `src/config.js`. Loaded from `.env` via Node's nativ
 - **BOTD detail chip:** `<span class="botd-chip">` with sun-horizon icon, bounce-in animation (0.5s spring), shown when `isBotd(currentBird.serialNumber)` is true. Uses the site accent color, sits alongside IUCN and rarity chips in `.bird-badges`.
 - **Bird list row layout:** name on the first line (full width); second line shows `#0001 · Scientific name` inline — serial in mono, separator `·`, then italic scientific name. Group tag visible on desktop (≥640px), hidden on mobile to prevent cramping. The `--row-accent` / `--row-accent-bg` CSS custom properties carry the group color onto the row hover state regardless.
 - **Serial format:** `formatSerial()` in `web/src/composables/format.ts` — 4-digit zero-padded (`#0001`, not `#001`)
-- **Detail page:** image carousel with swipe support, dot indicators, image tags (adult/juvenile/male/female — "default" tag hidden). Prev/next bird navigation is in the intro panel, not on the image. Share button is a full-width `.bird-share-cta` CTA below the identity block (not inline in the nav row). Loader is animated dots, not the feather SVG.
+- **Detail page:** image carousel with swipe support, dot indicators, image tags (adult/juvenile/male/female — "default" tag hidden). Prev/next bird navigation is in the intro panel, not on the image. Share button is a full-width `.bird-share-cta` CTA below the identity block (not inline in the nav row). Loader is animated dots, not the feather SVG. Nav buttons have `min-height: 44px` for touch target compliance.
+- **Detail page — v2 data fields:** birds with `version >= '2026.04'` show additional fields in the intro panel: `weightG` (`715–1015 g`), `wingspanCm` (`85–95 cm`) as extra rows in the `.intro-meta` 2-column grid below Colors/Size. `seasonalityInIndia` appears in the Habitat & Range panel below Distribution/Migration. A `.bird-version-badge` (`v2026.04` or `v2025.01` fallback) sits above the intro-meta grid for debugging. All three are conditional on field presence — old birds render nothing new.
+- **Detail page — array fields:** `habitat`, `diet`, and `bestSeenAt` all render as `.tag-row` of `.detail-tag` pills — one consistent pattern, no per-item icons. The panel title icon (`i-ph-tree-evergreen`, `i-ph-bowl-food`) carries the semantic meaning for the section. Per-item icon mapping via regex was tried and removed — the dataset has 190+ unique habitat values and 87+ diet values, no icon set can map them meaningfully.
+- **Detail page — intro panel layout:** `justify-content: flex-start` (not `center`) to prevent silent top-clipping on content-heavy birds. `overflow-y: auto` removed from `.bird-detail-panel` (no constrained height to scroll against).
+- **Microinteraction system:** three tiers defined in DESIGN.md Section 5. Tier 1 = fill (Share CTA), Tier 2 = tint (nav buttons, chips), Tier 3 = lift + shadow (navigational pills). `filter: brightness()` is banned — use the documented shadow values. Hover transitions always use `--transition-fast`.
 - **Panel backgrounds:** accent-tinted (5% forest green in light, 6% mint in dark) with `--surface-gradient` overlay and a 2px accent-derived top border — branded surface, not generic gray.
 - **Elevation system:** `--shadow-xs / sm / md / lg` (upward-scaled opacity for dark mode) + `--shadow-up-sm` for bottom nav. Dark values are 3–4× the light opacity. Never use raw `box-shadow` values for UI chrome — always use these tokens.
 - **Surface gradient:** `--surface-gradient` (linear, white 4% → transparent) adds subtle dimensionality to panels without a second color. Dark variant uses 2.5%.
@@ -148,6 +153,33 @@ When asked to run `pnpm verify-birds` for any range:
 5. Report a summary to the user: counts of matched/failed, list of failures with the eBird-correct scientific name and what changed, and any notable auto-corrections (commonName fallback matches).
 6. Do NOT re-run the script automatically — wait for the user to fix the DB entries for failed birds first.
 
+## upsert-birds-v2 Workflow
+
+**Script:** `src/scripts/upsert-birds-v2.js` — upserts birds from `data/birdsV2/<N>.json` into MongoDB.
+**Run:** `node --env-file=.env src/scripts/upsert-birds-v2.js "42"` or `"41-45"` or `"[41,43]"`
+
+### Serial number convention
+
+Batch N covers serials `(N-1)*10+1` … `N*10`. Position `i` (0-indexed) within the file maps to serial `(N-1)*10 + i + 1`. Examples: batch 1 → #1–10, batch 42 → #411–420, batch 50 → #491–500. Serials are fully deterministic from file name + position — no DB max-serial query.
+
+### Validation
+
+Before processing each record, `validateRecord()` checks that all required keys are present:
+`Name`, `Scientific_Name`, `IUCN_status`, `Habitat`, `Distribution_Range_Size`, `Best_seen_at`, `Migration_status`, `Order`, `Family`, `Common_grouping`, `Rarity`, `How_to_identify`, `Primary_colors_of_the_bird`, `Size_of_the_bird`, `Diet`.
+Missing keys → outcome `invalid`, record skipped. Optional fields (`Seasonality_in_India`, `Weight_g`, `Wingspan_cm`, `Call_description`, `Juvenile_description`, `Similar_species_in_India`) may be absent from the JSON — they map to `null` and are skipped on update if null.
+
+### Per-bird resolution order
+
+1. **Look up by `scientificName`** from JSON → if found: **update** non-taxonomic enrichment fields (outcome: `updated`). Fields in `SKIP_ON_UPDATE` (`order`, `family`, `commonGroup`, `scientificName`, `name`, `serialNumber`, `hash`, `speciesCode`, `verification`) are never overwritten.
+2. **Not found by name → look up by expected serial:**
+   - **Record exists, `verification.scientificName.verified === true`** → JSON scientific name is a synonym/old name; DB has the eBird-accepted name. Still **apply enrichment fields** to the existing record (outcome: `name_mismatch_verified`). Name and verified fields are not overwritten. Log for awareness — no manual action required unless the enrichment data itself needs review.
+   - **Record exists, not yet verified** → Still **apply enrichment fields** (outcome: `name_mismatch_unverified`). Scientific name conflict needs manual review — decide whether to update the DB name or the JSON file.
+   - **No record at that serial** → **create** with the expected serial (outcome: `created`).
+
+### Log file
+
+Every run writes `DataCollector/logs/upsert-v2-<ts>.json`. Check for `name_mismatch_unverified` entries — those need a manual decision on which scientific name is correct before the next verify-birds run. `name_mismatch_verified` entries are informational only (enrichment was applied, eBird name already confirmed).
+
 ## Git Rules
 
 - NEVER push to remote without explicit user approval. Commit locally and wait for review.
@@ -155,7 +187,7 @@ When asked to run `pnpm verify-birds` for any range:
 
 ## Design Reference
 
-`DESIGN.md` at the project root is the canonical design critique and token rationale document. It covers: the elevation system rationale, dark mode contrast fixes, typography weight floors, component-level before/after decisions, and the share card design philosophy. Read it before making design decisions.
+`DESIGN.md` at the project root is the canonical design critique and token rationale document. It covers: the elevation system rationale, dark mode contrast fixes, typography weight floors, component-level before/after decisions, the microinteraction tier system (Section 5), the share card design philosophy, and array field display rules. Read it before making any design decisions — it is authoritative.
 
 ## Lint Rules
 

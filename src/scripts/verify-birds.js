@@ -19,6 +19,7 @@ import { readFile, writeFile, mkdir } from 'fs/promises';
 import mongoose from 'mongoose';
 
 import birdBasicModel from '#models/birdBasicModel.js';
+import { generateMD5Hash } from '#utils/common.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -260,6 +261,9 @@ async function processBird(bird, scientificNameMap, commonNameMap) {
   entry.matchedCsvRow = Object.fromEntries(
     Object.entries(csvRow).filter(([, v]) => v !== ''),
   );
+
+  // Always recompute hash from the authoritative CSV scientific name
+  patch.hash = generateMD5Hash(csvRow.scientificName);
 
   // 2. speciesCode — always set / upsert from CSV
   if (csvRow.speciesCode && csvRow.speciesCode !== bird.speciesCode) {

@@ -20,6 +20,28 @@ const loading = ref(true)
 const { iucnStatus, iucnStatusLabel, iucnStatusExplanation, iucnChipClass } = useIucnStatus(currentBird)
 const sharing = ref(false)
 
+
+// TODO: retire version check and sizeRange fallback once all birds are updated to v2 data
+const sizeDetail = computed(() => {
+  const b = currentBird.value
+  if (!b) return null
+  const isV2 = b.version && b.version >= '2026.04'
+  if (isV2) return b.lengthCm ? `${b.lengthCm} cm` : null
+  return b.sizeRange ?? null
+})
+
+const weightDisplay = computed(() => {
+  const w = currentBird.value?.weightG
+  if (!w) return null
+  return w.min === w.max ? `${w.min} g` : `${w.min}–${w.max} g`
+})
+
+const wingspanDisplay = computed(() => {
+  const w = currentBird.value?.wingspanCm
+  if (!w) return null
+  return w.min === w.max ? `${w.min} cm` : `${w.min}–${w.max} cm`
+})
+
 const currentImageUrl = computed(() => {
   const img = images.value[activeImage.value]
   return img ? imageSrc(img) : ''
@@ -212,7 +234,6 @@ watch(
         </span>
         <button
           class="bird-nav-btn"
-          :disabled="!currentBird"
           aria-label="Next bird"
           @click="navigate(birdId + 1)"
         >
@@ -231,10 +252,15 @@ watch(
       </div>
 
       <div class="bird-badges">
-        <span
-          class="detail-tag capitalize"
+        <button
+          class="detail-tag detail-tag--clickable capitalize"
           :style="{ background: groupColor(currentBird.commonGroup).bg, color: groupColor(currentBird.commonGroup).text }"
-        >{{ currentBird.commonGroup }}</span>
+          :title="`Browse all ${currentBird.commonGroup}`"
+          @click="router.push({ path: '/', query: { group: currentBird.commonGroup } })"
+        >
+          {{ currentBird.commonGroup }}
+          <span i-ph-caret-right class="group-pill-arrow" />
+        </button>
         <span
           v-if="iucnStatus"
           :title="iucnStatusExplanation"
@@ -279,6 +305,8 @@ watch(
         {{ currentBird.identification }}
       </p>
 
+      <span class="bird-version-badge">v{{ currentBird.version ?? '2025.01' }}</span>
+
       <div class="intro-meta">
         <div class="detail-meta-item">
           <span class="detail-meta-label">Colors</span>
@@ -286,7 +314,18 @@ watch(
         </div>
         <div class="detail-meta-item">
           <span class="detail-meta-label">Size</span>
-          <span class="detail-meta-value capitalize">{{ currentBird.size }} · {{ currentBird.sizeRange }}</span>
+          <span class="size-display" :style="{ '--accent': groupColor(currentBird.commonGroup).text }">
+            <span class="size-display-category">{{ currentBird.size }}</span>
+            <span v-if="sizeDetail" class="size-display-detail"> · {{ sizeDetail }}</span>
+          </span>
+        </div>
+        <div v-if="weightDisplay" class="detail-meta-item">
+          <span class="detail-meta-label">Weight</span>
+          <span class="detail-meta-value">{{ weightDisplay }}</span>
+        </div>
+        <div v-if="wingspanDisplay" class="detail-meta-item">
+          <span class="detail-meta-label">Wingspan</span>
+          <span class="detail-meta-value">{{ wingspanDisplay }}</span>
         </div>
       </div>
     </div>
@@ -305,7 +344,10 @@ watch(
         </div>
         <div class="detail-meta-item">
           <span class="detail-meta-label">Best seen at</span>
-          <span class="detail-meta-value">{{ currentBird.bestSeenAt }}</span>
+          <div v-if="Array.isArray(currentBird.bestSeenAt) && currentBird.bestSeenAt.length" class="tag-row">
+            <span v-for="loc in currentBird.bestSeenAt" :key="loc" class="detail-tag">{{ loc }}</span>
+          </div>
+          <span v-else class="detail-meta-value">{{ currentBird.bestSeenAt }}</span>
         </div>
         <div class="detail-meta-item detail-meta-pair">
           <div>
@@ -316,6 +358,10 @@ watch(
             <span class="detail-meta-label">Migration</span>
             <span class="detail-meta-value capitalize">{{ currentBird.migrationStatus }}</span>
           </div>
+        </div>
+        <div v-if="currentBird.seasonalityInIndia" class="detail-meta-item">
+          <span class="detail-meta-label">Seasonality</span>
+          <span class="detail-meta-value capitalize">{{ currentBird.seasonalityInIndia }}</span>
         </div>
       </div>
     </div>
@@ -329,6 +375,7 @@ watch(
         <span v-for="d in currentBird.diet" :key="d" class="detail-tag capitalize">{{ d }}</span>
       </div>
     </div>
+
   </div>
   <div v-else class="not-found">
     <div i-ph-binoculars class="not-found-icon" />

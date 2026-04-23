@@ -24,6 +24,8 @@
     "dev": "concurrently \"node --env-file=.env index.js\" \"cd web && pnpm dev\" --names backend,frontend --prefix-colors blue,magenta",
     "verify-birds": "node --env-file=.env src/scripts/verify-birds.js",
     "insert-birds": "node --env-file=.env src/scripts/insert-birds.js",
+    "upsert-birds-v2": "node --env-file=.env src/scripts/upsert-birds-v2.js",
+    "migrate-best-seen-at": "node --env-file=.env src/scripts/migrate-best-seen-at.js",
     "lint:fix": "eslint 'index.js' 'src/**/*.js?(x)' --fix",
     "prepare": "husky",
     "build:FE": "cd web && npx pnpm@latest i && npx pnpm@latest build",

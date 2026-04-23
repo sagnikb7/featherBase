@@ -92,10 +92,13 @@ featherBase/
 │   ├── constants/            # API status codes, error messages
 │   ├── utils/                # Logger (Winston), MD5 hashing, Mongo connection
 │   └── scripts/
-│       ├── insert-birds.js   # Bulk insert from data/birds/ into MongoDB
-│       └── verify-birds.js   # Cross-reference DB records against eBird CSV
+│       ├── insert-birds.js        # Bulk insert from data/birds/ into MongoDB
+│       ├── upsert-birds-v2.js     # Upsert enriched v2 data from data/birdsV2/ (idempotent)
+│       ├── migrate-best-seen-at.js # One-shot: convert bestSeenAt string → [String] array
+│       └── verify-birds.js        # Cross-reference DB records against eBird CSV
 │
-├── data/birds/              # Bird data (51 batch JSON files, 10 birds each)
+├── data/birds/              # Original bird data (batch JSON files, 10 birds each)
+├── data/birdsV2/            # Enriched v2 bird data — additional fields per bird
 │
 ├── DataCollector/           # Data collection (Python scrapers)
 │
@@ -108,22 +111,26 @@ featherBase/
 │   │   │   ├── test-cards.vue  # Dev tool: generate reference cards for all 5 rarity tiers
 │   │   │   └── [...all].vue    # 404 catch-all
 │   │   ├── components/
-│   │   │   ├── BirdImage.vue  # Image with color-gradient loading placeholder
-│   │   │   ├── TheHeader.vue  # Sticky nav with dark mode toggle
-│   │   │   └── BottomNav.vue  # iOS-style bottom bar (mobile only)
+│   │   │   ├── BirdImage.vue     # Image with color-gradient loading placeholder
+│   │   │   └── BottomNav.vue     # iOS-style bottom nav (Birds + Settings)
 │   │   ├── composables/
-│   │   │   ├── index.ts       # Re-exports + baseUrl
-│   │   │   ├── dark.ts        # Dark mode toggle
-│   │   │   ├── iucn.ts        # IUCN status → colored chip + explanation
-│   │   │   ├── groupColor.ts  # Deterministic color hashing for bird groups
-│   │   │   ├── rarity.ts      # 5-tier rarity metadata (label, color, glow)
-│   │   │   └── shareCard.ts   # Canvas-based trading card generator
-│   │   ├── styles/            # "The Digital Curator" design system
-│   │   │   ├── main.css       # Import hub
-│   │   │   ├── tokens.css     # Design tokens, dark mode, paper grain texture
-│   │   │   ├── base.css       # Reset, app shell, header, bottom nav, transitions
-│   │   │   └── components/    # search.css, status.css, bird-detail.css
-│   │   └── types/common.ts    # Bird, Meta, Image, IUCNStatus types
+│   │   │   ├── index.ts          # Re-exports + baseUrl
+│   │   │   ├── settings.ts       # Theme system (light/dark/auto/midnight) + localStorage persistence
+│   │   │   ├── iucn.ts           # IUCN status → colored chip + explanation
+│   │   │   ├── groupColor.ts     # Deterministic djb2 hash → 10-color earthy palette per group
+│   │   │   ├── rarity.ts         # 5-tier rarity metadata (label, color, glow)
+│   │   │   ├── shareCard.ts      # Canvas-based trading card generator (630×880 @ 2×)
+│   │   │   ├── botd.ts           # saveBotdSerial / isBotd via sessionStorage
+│   │   │   ├── format.ts         # formatSerial() — 4-digit zero-padded (#0042)
+│   │   │   ├── confetti.ts       # fireUnlockConfetti() — midnight theme unlock effect
+│   │   │   ├── pwaInstall.ts     # beforeinstallprompt capture + install trigger
+│   │   │   └── networkStatus.ts  # useNetworkStatus() — SW-driven offline banner
+│   │   ├── styles/               # "The Digital Curator" design system
+│   │   │   ├── main.css          # Import hub
+│   │   │   ├── tokens.css        # Design tokens — colors, shadows, typography, grain texture
+│   │   │   ├── base.css          # Reset, app shell, bottom nav, offline banner, transitions
+│   │   │   └── components/       # search.css, status.css, bird-detail.css, settings.css
+│   │   └── types/common.ts       # Bird, Meta, Image, IUCNStatus types
 │   └── vite.config.ts
 │
 └── public/                  # Static assets (bird images gitignored)
@@ -163,8 +170,8 @@ featherBase/
 - **IUCN status chips** — colored dot + code + label (LC through EX), pulse animation on critical statuses
 - **Group color hashing** — deterministic djb2 hash maps each group name to a 10-color earthy palette, consistent across list and detail views
 - **Page transitions** — fade + drift animation via Vue `<Transition>`, respects `prefers-reduced-motion`
-- **Mobile-first** — iOS-style bottom nav, organic card overlap on detail page, safe area support
-- **Dark mode** — comprehensive token-based theming, toggleable from header or bottom nav
+- **Mobile-first** — iOS-style bottom nav (Birds + Settings), organic card overlap on detail page, 44px minimum touch targets, safe area support
+- **Theme system** — four themes: Light, Dark, Auto (system), and Midnight (deep violet, locked until user shares a bird card). Controlled from Settings page. No inline toggle.
 - **Rarity system** — 5-tier rarity (Common → Legendary) with progressive visual treatment on detail page: colored badge, glow effects, and accent saturation scaling with tier
 - **Bird of the Day** — home page features a daily bird card (seeded by date) with entrance slide-up animation, one-shot shimmer sweep, and a persistent accent glow in the bird's group color. Visiting that bird's detail page shows a "Bird of the Day" chip in the badge row. All animations respect `prefers-reduced-motion`
 - **Trading card share** — "Share" on any bird's detail page generates a 630×880 (rendered at 2×) trading card via Canvas API. Each rarity tier has a distinct deeply-saturated dark background (near-black for Common, rich hues for higher tiers) with a hard cut between image and info panel. Accent color, serial pill, divider, and name progressively adopt the tier accent as rarity increases. When sharing the Bird of the Day, the card gets a gold "✦ TODAY" pill on the image and a "BIRD OF THE DAY · DATE" gold eyebrow above the name. Web Share API with PNG download fallback
@@ -203,6 +210,8 @@ Alternatively, deploy on **Render** using `render.yaml` at the project root — 
 
 ## Data Pipeline
 
+### Original pipeline (v1 data)
+
 1. **Extract bird names** — Python scrapers in `DataCollector/` pull from Wikipedia and dibird.com
 2. **Generate bird data** — Feed batches of 10 names to an LLM using the prompt in [`DataCollector/prompt.txt`](DataCollector/prompt.txt), save as `data/birds/<n>.json`
 3. **Insert into MongoDB** — transforms fields, deduplicates by scientific name, and bulk-inserts with sequential serial numbers
@@ -218,5 +227,17 @@ pnpm insert-birds "[56,58,60]"   # insert specific batch files
 pnpm verify-birds "1-10"         # verify serial numbers 1 through 10
 pnpm verify-birds "[23,56,67]"   # verify specific serial numbers
 ```
+
+### Enrichment pipeline (v2 data)
+
+Birds are progressively enriched with additional fields via a separate v2 JSON format and upsert script. v2 adds: `lengthCm`, `weightG` (min/max), `wingspanCm` (min/max), `callDescription`, `juvenileDescription`, `similarSpecies`, `seasonalityInIndia`, `version`.
+
+```bash
+node --env-file=.env src/scripts/upsert-birds-v2.js "42"     # upsert batch 42 (serials 411–420)
+node --env-file=.env src/scripts/upsert-birds-v2.js "41-45"  # upsert range of batches
+node --env-file=.env src/scripts/upsert-birds-v2.js "[41,43]" # upsert specific batches
+```
+
+The script is idempotent — safe to re-run. It looks up each bird by `scientificName` first, then falls back to the expected serial number. Fields in `SKIP_ON_UPDATE` (taxonomic and eBird-verified fields) are never overwritten. Every run writes a structured log to `DataCollector/logs/upsert-v2-<ts>.json`. Birds without v2 data continue to work normally in the UI — all new fields are optional and conditionally rendered.
 
 > **Note on data origin:** All bird data in this database is **AI-generated** using the prompt in `DataCollector/prompt.txt` — it is not scraped or copied from any third-party source. Because it is LLM-generated, some fields (IUCN status, distribution, sighting hotspots) may contain inaccuracies. Always cross-check critical data against authoritative sources such as the IUCN Red List or eBird.

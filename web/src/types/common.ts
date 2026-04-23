@@ -9,8 +9,9 @@ export interface Bird {
   iucnStatus: string
   habitat: string[]
   distributionRangeSize: string
-  bestSeenAt: string
+  bestSeenAt: string | string[]
   migrationStatus: string
+  seasonalityInIndia?: string
   order: string
   family: string
   commonGroup: string
@@ -18,9 +19,16 @@ export interface Bird {
   identification: string
   colors: string
   size: string
-  sizeRange: string
+  sizeRange?: string
+  lengthCm?: number
+  weightG?: { min: number, max: number }
+  wingspanCm?: { min: number, max: number }
+  callDescription?: string
+  juvenileDescription?: string
+  similarSpecies?: string[]
   diet: string[]
   speciesCode?: string
+  version?: string
   verification?: Record<string, unknown>
   created_at: string
   updated_at: string

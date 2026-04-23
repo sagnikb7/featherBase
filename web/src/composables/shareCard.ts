@@ -93,7 +93,7 @@ export async function generateCard(bird: Bird, imageUrl: string, botd = false): 
   if (bird.diet?.length)
     meta.push(['Diet', bird.diet.join(', ')])
   if (bird.bestSeenAt)
-    meta.push(['Best seen at', bird.bestSeenAt])
+    meta.push(['Best seen at', Array.isArray(bird.bestSeenAt) ? bird.bestSeenAt.join(', ') : bird.bestSeenAt])
 
   const nameSize = bird.name.length > 20 ? 32 : 40
   const metaLineH = 32

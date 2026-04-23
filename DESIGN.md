@@ -6,8 +6,12 @@
 - Font pairing (Manrope + Newsreader + DM Mono) is solid and distinctive.
 - Paper grain texture adds character without distraction.
 - Group color hashing is a clever identity system.
-- The Pokedex mental model is clear and well-executed.
+- The Pokédex mental model is clear and well-executed.
 - Dark/light theming structure is sound.
+- Habitat, diet, and best seen at all use the same `.tag-row` pill pattern — consistent across all array fields. Panel title icons (`i-ph-tree-evergreen`, `i-ph-bowl-food`) carry the semantic meaning; individual items are text only.
+- Clickable group pill on detail page navigates to home filtered by group — caret icon (`i-ph-caret-right`) at 70% opacity slides right on hover, signalling interactivity.
+- `bestSeenAt` stored as `[String]` (migrated from string in April 2026) — rendered as pills on the detail page; no icon repetition needed since the label contextualises the field.
+- Size typography: `LARGE · 75 cm` — category in small-caps Manrope 700, measurement in DM Mono in group accent. Clean, field-guide honest, no widget chrome.
 
 ### What's not working
 
@@ -113,6 +117,20 @@ All other scale values unchanged.
 
 #### Rule: no weight below 400 in dark mode, no text below 11px anywhere.
 
+#### Font role assignments
+
+Each font has a strict domain. Mixing them outside their domain is a bug.
+
+| Font | Token | Domain |
+|---|---|---|
+| Manrope | `--font-sans` | Labels, buttons, chips, meta labels, UI chrome, section headers |
+| Newsreader | `--font-serif` / `--font-display` | Bird names, scientific names, body text, the hero title "feather" word |
+| DM Mono | `--font-mono` | **Data only** — serial numbers, species counts, numerical values |
+
+**DM Mono is for data, not labels.** "Bird of the Day", "Field Index", section headings — these are labels, not data. They use `--font-sans`. Only use `--font-mono` when the value is a number, code, or identifier that benefits from fixed-width rendering (serials like `#0042`, counts like `600`).
+
+**`--font-display` and `--font-serif` are the same font (Newsreader).** The distinction is semantic — display for large hero text, serif for body. Do not introduce a different display font without updating both tokens.
+
 ---
 
 ## 3. Component Improvements
@@ -175,7 +193,25 @@ All other scale values unchanged.
 
 The upward shadow sells the overlap illusion and creates the single biggest "depth" improvement in the app.
 
-### 3.6 Detail Page — Info Panels
+### 3.6 Detail Page — Data Fields (v2 schema, 2026.04+)
+
+Birds updated via `upsert-birds-v2.js` carry a `version` field (`"YYYY.MM"` string). Frontend gates new fields on `version >= '2026.04'`.
+
+**New fields rendered on detail page:**
+
+| Field | Display | Notes |
+|---|---|---|
+| `lengthCm` | Size typography `LARGE · 75 cm` | Replaces `sizeRange` string for v2 birds. `sizeRange` kept for backward compat — TODO: retire once all birds updated. |
+| `weightG` / `wingspanCm` | `intro-meta` grid rows 3+4 — `715–1015 g` / `85–95 cm`. Conditional on field presence (v2 only). |
+| `seasonalityInIndia` | Habitat & Range panel — standalone `detail-meta-item` below the Distribution/Migration pair. Conditional. |
+| `callDescription` | Not yet surfaced — prior attempt broke layout | Needs isolated panel with careful mobile testing |
+| `juvenileDescription` / `similarSpecies` | Not yet surfaced | Reserved for next detail page phase |
+
+**Rule:** Never surface a new v2 field without testing on mobile (6.1" target). The call description panel was reverted because it disrupted layout — add a `v-if` guard and test panel height on mobile before re-adding.
+
+**Size display rule:** `LARGE · 75 cm` — category in small-caps (`text-transform: uppercase`, `letter-spacing: 0.07em`, `font-weight: 700`, `--font-sans`), separator `·`, measurement in `--font-mono` in group accent color. No visual indicator (ruler, pip dots, etc.) — the word is self-explanatory.
+
+### 3.6b Detail Page — Info Panels
 
 | Property | Before | After |
 |---|---|---|
@@ -185,6 +221,16 @@ The upward shadow sells the overlap illusion and creates the single biggest "dep
 | Border-top width | 1px | 2px |
 | Border-top color opacity | current | increase to 15% opacity |
 | Panel title icon opacity | 0.6 | 0.8 |
+
+**Array field display pattern (established 2026.04):**
+
+All three array fields — Habitat, Diet, Best seen at — use the same visual treatment: `.tag-row` of `.detail-tag` pills. One pattern, no exceptions.
+
+The panel title (`i-ph-tree-evergreen` for Habitat, `i-ph-bowl-food` for Diet) carries the semantic meaning for the whole section. Individual items are text; they do not need icons.
+
+**Why no per-item icons:** The dataset has 190+ unique habitat values and 87+ diet values. No icon set can meaningfully represent that vocabulary — any mapping either repeats the same icon (decoration, not information) or gets the wrong icon (noise). Regex-based mapping was tried and removed. Static lookup maps would require 280+ maintained entries. The text is already descriptive: "mangrove creeks", "large fish", "wasp larvae" need no icon gloss.
+
+**Rule:** never repeat the same icon on every item in a list — if the icon is the same for all items, it's decoration not information. Use the label instead. If a vocabulary is too large and varied to map meaningfully (>20 unique values), use text only.
 
 ### 3.7 Bottom Nav
 
@@ -238,12 +284,120 @@ On mobile (`≤ 768px`) the detail page collapses to a single-column stacked lay
 
 ---
 
+## 5. Microinteraction System
+
+Every interactive element in FeatherBase belongs to exactly one of three tiers. The tier determines the hover and active treatment. Mixing tiers on the same element is a bug.
+
+### The Three Tiers
+
+#### Tier 1 — Primary CTA
+**One per screen. High commitment. Fills with color.**
+
+The most visually prominent interactive state in the app. Reserved for the single action the page is built around. On hover, the surface floods with the accent color and the text inverts. On active, no additional transform — the fill is enough weight.
+
+```css
+/* hover */
+background: var(--color-accent);
+color: var(--color-bg);
+
+/* active — no transform, fill is already decisive */
+opacity: 0.9;
+```
+
+**Examples:** Share Bird Card button (`.bird-share-cta`), Install button (`.install-pill-btn`).  
+**Rule:** There should be at most one Tier 1 element visible on screen at a time. If two primary CTAs compete, one of them is wrong.
+
+---
+
+#### Tier 2 — Utility / Ghost Buttons
+**Repeated controls. Light weight. Tint on hover.**
+
+Used for navigation controls, icon buttons, and any repeated button that doesn't trigger a significant action. On hover, the background picks up a light `accent-light` tint and the text shifts toward accent or full text color. No transform — these buttons don't move.
+
+```css
+/* hover */
+background: var(--color-accent-light);
+color: var(--color-text);        /* or var(--color-accent) */
+
+/* active */
+background: var(--color-bg-muted);
+```
+
+**Examples:** Prev/Next bird nav (`.bird-nav-btn`), header icon buttons (`.header-btn`), group chips on the home page (`.group-chip`), nav buttons (`.bird-nav-btn`), spread/cache action buttons.  
+**Rule:** Tier 2 elements do not move (no `translateY`, no `translateX`). Motion is reserved for Tiers 1 and 3.
+
+---
+
+#### Tier 3 — Navigational Pills
+**Inline chips that navigate. Lift + shadow on hover.**
+
+Used for pills and chips embedded in content that take the user somewhere else. On hover, the element lifts with `translateY(-1px)` and a shadow appears beneath it — the shadow is the physical consequence of the lift. On active (press), the lift reverses and the shadow disappears.
+
+```css
+/* hover */
+transform: translateY(-1px);
+box-shadow: 0 3px 8px rgba(0,0,0,0.12);   /* light */
+/* dark: */
+box-shadow: 0 3px 8px rgba(0,0,0,0.32);
+
+/* active */
+transform: translateY(0);
+box-shadow: none;
+```
+
+**Why not `filter: brightness()`?** `brightness()` is a CSS filter hack with no semantic grounding. It composites differently depending on what's behind the element, behaves inconsistently on inline-colored elements (like group pills with dynamic background), and tells the user nothing about intent. The lift + shadow metaphor communicates "this goes somewhere" — the same cue used in physical interfaces for buttons and links.
+
+**Examples:** Clickable group pill on detail page (`.detail-tag--clickable`).  
+**Rule:** The arrow icon inside a Tier 3 pill slides `translateX(2px)` on hover as a secondary directional cue. Do not add a brightness filter on top.
+
+---
+
+### Transition Tokens
+
+All interactive transitions use the pre-defined tokens, never raw durations:
+
+| Token | Value | Use |
+|---|---|---|
+| `--transition-fast` | `0.12s ease-out` | All hover/active states |
+| `--transition-base` | `0.2s cubic-bezier(0.25, 0.1, 0.25, 1)` | Entrance animations, state changes |
+| `--transition-gentle` | `0.35s cubic-bezier(0.4, 0, 0.2, 1)` | Heavy elements, overlays |
+
+**Rule:** Hover transitions are always `--transition-fast`. Page entrance animations use `--transition-base` or a named cubic-bezier. Never raw `ms` values in component CSS. One-shot animations (BOTD entrance, BOTD shimmer, row stagger) may use custom cubic-bezier values directly since they are not interactive states.
+
+---
+
+### Tier Assignment Reference
+
+| Element | Tier | Rationale |
+|---|---|---|
+| Share Bird Card button | 1 | Primary action on detail page |
+| Install PWA button | 1 | Primary action on settings page |
+| Spread the Word button | 1 | Primary action, unlocks feature |
+| Prev / Next bird nav | 2 | Repeated navigation control |
+| Header icon buttons | 2 | Utility icons |
+| Home group chips | 2 | Filter controls, not navigation away |
+| Bottom nav items | 2 | Navigation tabs (no transform) |
+| Clickable group pill (detail) | 3 | Inline chip — navigates to a different page |
+| Cache clear button | 2 | Utility action |
+
+---
+
+### What Breaks Consistency
+
+1. **`filter: brightness()` on any element** — remove it. It has no place in this system.
+2. **`translateY` on a Tier 2 button** — motion is reserved for Tiers 1 and 3.
+3. **Fill-on-hover for a Tier 3 pill** — fill belongs to Tier 1. Pills lift.
+4. **Two Tier 1 elements on the same screen** — one must be demoted.
+5. **Raw `box-shadow` values in component CSS** — use elevation tokens (`--shadow-xs`, `--shadow-sm`, etc.) or the Tier 3 lift shadow exactly as specified above.
+
+---
+
 ## 6. Mobile-Specific (6.1" target)
 
 ### Touch targets
 - Bird row: minimum 48px total height (increase padding to `14px 16px`)
 - Carousel arrows: 36px (up from 28px)
-- Bird nav buttons (prev/next): padding `8px 12px`
+- Bird nav buttons (prev/next): padding `8px 12px` + `min-height: 44px` — padding alone gives ~35px, min-height enforces the touch target floor
 - Bottom nav items: ensure 48px tap square
 
 ### Typography floors

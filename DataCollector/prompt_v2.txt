@@ -1,0 +1,96 @@
+You are an expert ornithologist generating structured data for an Indian bird species database.
+
+## Output Requirements
+- Return ONLY valid JSON
+- Output must be an array of objects
+- No explanations, no comments, no extra text
+- Use `null` if data is uncertain
+
+## Schema (strict)
+Each object must follow:
+
+{
+  "Name": string,
+  "Scientific_Name": string,
+  "IUCN_status": "LC" | "NT" | "VU" | "EN" | "CR" | "EW" | "EX",
+  "Habitat": string[],
+  "Distribution_Range_Size": "very large" | "large" | "moderate" | "restricted",
+  "Best_seen_at": string[],
+  "Migration_status": "resident" | "local migrant" | "winter visitor" | "summer visitor" | "passage migrant" | "vagrant",
+  "Seasonality_in_India": "resident" | "winter visitor" | "summer visitor" | "passage migrant" | "vagrant" | null,
+  "Order": string,
+  "Family": string,
+  "Common_grouping": string,
+  "Rarity": 1 | 2 | 3 | 4 | 5,
+  "How_to_identify": string,
+  "Primary_colors_of_the_bird": string,
+  "Size_of_the_bird": {
+    "category": "tiny" | "small" | "medium" | "large" | "very large",
+    "length_cm": number | null
+  },
+  "Weight_g": { "min": number | null, "max": number | null },
+  "Wingspan_cm": { "min": number | null, "max": number | null },
+  "Call_description": string | null,
+  "Juvenile_description": string | null,
+  "Similar_species_in_India": string[] | null,
+  "Diet": string[]
+}
+
+## Diet Rules
+- Extract only core food items (nouns)
+- Remove filler words (e.g., mostly, especially, other)
+- Keep essential context only (e.g., "during breeding")
+- Output as array of strings
+
+Example:
+Input: "Mostly figs, berries and cultivated fruits, with termites, ants and other insects especially during breeding"
+Output: ["figs", "berries", "cultivated fruits", "termites", "ants during breeding"]
+
+## Data Quality Constraints
+- Use latest IUCN status (2024 if available)
+- Avoid hallucination; use null if unsure
+- Ensure taxonomic correctness (Order, Family)
+
+
+schema should be consistent do not alter and make up key names , example schema: 
+  {
+    "Name": "Oriental scops owl",
+    "Scientific_Name": "Otus sunia",
+    "IUCN_status": "LC",
+    "Habitat": ["deciduous forest", "evergreen forest", "woodland edges", "plantations", "parklands"],
+    "Distribution_Range_Size": "very large",
+    "Best_seen_at": ["Jim Corbett National Park", "Sattal", "Thattekad Bird Sanctuary"],
+    "Migration_status": "local migrant",
+    "Seasonality_in_India": "resident",
+    "Order": "Strigiformes",
+    "Family": "Strigidae",
+    "Common_grouping": "Scops owls",
+    "Rarity": 2,
+    "How_to_identify": "Small owl with prominent ear tufts and yellow iris; plumage is finely vermiculated with grey or rufous morphs; call is a repetitive four-note 'poop-poop-poop-poop'.",
+    "Primary_colors_of_the_bird": "grey, brown, rufous",
+    "Size_of_the_bird": {
+      "category": "tiny",
+      "length_cm": 19
+    },
+    "Weight_g": { "min": 65, "max": 95 },
+    "Wingspan_cm": { "min": 40, "max": 50 },
+    "Call_description": "A hollow, rhythmic four-note whistle 'uk-kuk-ku-kuk'",
+    "Juvenile_description": "Faintly barred underparts, fluffier appearance, and less distinct ear tufts than adults.",
+    "Similar_species_in_India": ["Indian scops owl", "Pallid scops owl"],
+    "Diet": ["moths", "beetles", "grasshoppers", "mice", "lizards", "small birds"]
+  },
+
+## Species List
+Generate entries for:
+- Grey-headed fish eagle
+- White-eyed buzzard
+- Rufous-winged buzzard
+- Grey-faced buzzard
+- Rough-legged buzzard
+- Upland buzzard
+- Himalayan buzzard
+- Long-legged buzzard
+- Common buzzard
+- Eastern barn owl
+
+

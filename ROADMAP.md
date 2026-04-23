@@ -38,9 +38,12 @@ FeatherBase is the Pokédex for Indian birdwatchers — a curated dossier of eve
 **Gaps that block growth:**
 - No personal layer — nothing remembers you between visits (beyond theme)
 - Filter surface is shallow — can't filter by rarity, IUCN status, habitat, migration
-- Rich schema fields unused in the UI — `Best_seen_at`, `Migration_status`, `Order`, `Family`, `Primary_colors_of_the_bird`
+- Rich schema fields still unused in the UI — `order`, `family`, `weightG`, `wingspanCm`, `callDescription`, `juvenileDescription`, `similarSpecies`, `seasonalityInIndia`, `speciesCode` (eBird link) — see Phase 0 detail page expansion
 - No discovery path except search — if you don't know what you're looking for, you're stuck
 - No sense of progress or completion
+
+**Schema fields now live in the UI (April 2026):**
+`bestSeenAt` (pills), `migrationStatus` (meta), `seasonalityInIndia` (meta), `habitat` (pills), `diet` (pills), `size` + `lengthCm` (size display), `weightG` (intro-meta), `wingspanCm` (intro-meta), `colors`, `identification`, `rarity`, `iucnStatus`, `commonGroup` (clickable filter pill)
 
 ---
 
@@ -57,9 +60,28 @@ These aren't features. They're the table stakes that make all subsequent work la
 | Bird count visible on home | XS | "500 species documented" in the hero tagline |
 | Search by location — `Best_seen_at` field is searchable | S | Add to the regex search or separate endpoint |
 | Taxonomy view — browse by Order/Family not just common group | M | Data exists, needs a new browse path/page |
-| Fix empty-image states — placeholder that looks intentional, not broken | S | Currently just a white box |
+| Fix empty-image states — placeholder that looks intentional, not broken | S | Currently a camera-slash icon — needs more intentional treatment |
 | Detail page: "Related birds" section | M | Same Family or Group, simple aggregation query |
 | Detail page: Link to `Best_seen_at` location in Maps | XS | One anchor tag with a Google Maps search URL |
+
+### Detail Page — Next Data Layer (v2 schema fields, all in API now)
+
+Full schema from `/v1.0/birds/:id` as of April 2026. Fields below are in the DB for v2 birds but not yet surfaced in the UI.
+
+| Field | Sample value | Effort | Where it fits |
+|---|---|---|---|
+| `weightG` | `{ min: 715, max: 1015 }` | XS | Extend the existing size display: `MEDIUM · 48 cm · 715–1015 g` |
+| `wingspanCm` | `{ min: 85, max: 95 }` | XS | Same — `wingspan 85–95 cm` alongside length |
+| `seasonalityInIndia` | `"resident"` | XS | Add to the Habitat & Range panel next to `migrationStatus` |
+| `order` + `family` | `"Anseriformes"` / `"Anatidae"` | XS | New taxonomy row in the intro panel — both tappable to a future taxonomy browse |
+| `speciesCode` | `"fuwduc"` | XS | eBird external link: `ebird.org/species/<code>` — in the intro or about panel |
+| `similarSpecies` | `["Lesser whistling duck"]` | S | New panel: "Often Confused With" — pills that link to the similar bird's detail page (requires name→ID lookup) |
+| `callDescription` | `"A thin, clear two-note whistle 'kee-weeoo'"` | S | Field-guide quote in the Habitat & Range panel, below diet. One italic sentence. Previously reverted — needs isolated panel + mobile testing. |
+| `juvenileDescription` | `"Duller than adults with…"` | S | Show conditionally in the image panel when a juvenile-tagged image exists. Contextually relevant, not always shown. |
+
+**Priority order:** `weightG`/`wingspanCm`/`seasonalityInIndia` first (XS effort, no layout risk), then `order`/`family`/`speciesCode` (XS, high dossier value), then `similarSpecies` (S, needs backend name→ID lookup), then `callDescription` and `juvenileDescription` last (S, mobile layout risk).
+
+**Constraint:** Never surface a new field without testing on a 375px mobile viewport. `callDescription` was reverted once already for this reason.
 
 ---
 

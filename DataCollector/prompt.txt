@@ -17,7 +17,16 @@ Format of the JSON objects:
 - How_to_identify:  ( male, female distinction, unique features and characteristics that will help ID the species ).
 - Primary_colors_of_the_bird: ( example: A Shikra is ashy-blue-grey with orange accents ).
 - Size_of_the_bird: ( 'tiny', 'small', 'medium', 'large', 'very large' . also  provide size in cm if possible ).
-- Diet : Mostly figs, berries and cultivated fruits, with termites, ants and other insects especially during breeding ( this is hard to parse ) figs , termites , ant during breeding ( this is a good format )
+- Diet :   -> Rules: 
+           - Extract only core food items (nouns)
+           - Remove filler phrases, qualifiers, and adverbs (e.g., "mostly", "especially", "other")
+           - Preserve important contextual qualifiers only if essential (e.g., "during breeding")
+           - Use singular or plural consistently (prefer base noun form)
+           - Output as a comma-separated list
+           - Do not add explanations
+Example:
+Input: "Mostly figs, berries and cultivated fruits, with termites, ants and other insects especially during breeding"
+Output: "figs, berries, cultivated fruits, termites, ants during breeding"
 
 Important guidelines:
 - Use the most current IUCN Red List status available (2024 assessment if published).
@@ -29,26 +38,6 @@ Important guidelines:
 - If a field cannot be determined with confidence, use null rather than guessing.
 
 Please provide accurate information only in JSON format and no other text, as i need this for scientific purpose
-
-lets say one example of the data will look like :     {
-        "Name": "Red-breasted Merganser",
-        "Scientific_Name": "Mergus serrator",
-        "IUCN_status": "LC",
-        "Habitat": "coastal waters, large rivers",
-        "Distribution_Range_Size": "very large",
-        "Best_seen_at": "Coastal areas of India during winter",
-        "Migration_status": "foreign",
-        "Order": "Anseriformes",
-        "Family": "Anatidae",
-        "common_grouping": "ducks",
-        "Rarity": 3,
-        "How_to_identify": "Males with dark head and red breast, females with grey body and reddish head and neck.",
-        "Primary_colors_of_the_bird": "Black, red, grey",
-        "Size_of_the_bird": "medium, 52-58 cm",
-        "Diet": "Fish, aquatic invertebrates"
-    }
-
-a json file is also attached as the output reference 
 
 
 Provide it for the following bird species :
