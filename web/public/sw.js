@@ -1,6 +1,25 @@
 const CACHE_NAME = 'featherbase-v3'
 const API_CACHE_NAME = 'featherbase-api-v3'
 
+let swIsOffline = false
+
+async function notifyClients(type) {
+  const clients = await globalThis.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+  clients.forEach(client => client.postMessage({ type }))
+}
+
+function markOffline() {
+  if (swIsOffline) return
+  swIsOffline = true
+  notifyClients('NETWORK_OFFLINE')
+}
+
+function markOnline() {
+  if (!swIsOffline) return
+  swIsOffline = false
+  notifyClients('NETWORK_ONLINE')
+}
+
 const HOME_API_TTL = 5 * 60 * 1000 // 5 minutes
 const MAX_STORAGE_BYTES = 50 * 1024 * 1024 // 50 MB
 
@@ -96,7 +115,7 @@ async function staleWhileRevalidate(request) {
     if (isFresh) return cached
 
     // Stale — respond immediately, refresh in background
-    fetchAndCache(request, cache).catch(() => {})
+    fetchAndCache(request, cache).catch(() => markOffline())
     return cached
   }
 
@@ -111,6 +130,7 @@ async function staleWhileRevalidate(request) {
 async function fetchAndCache(request, cache) {
   const response = await fetch(request)
   if (response.ok) {
+    markOnline()
     const headers = new Headers(response.headers)
     headers.set('X-Cached-At', String(Date.now()))
     const stamped = new Response(await response.clone().arrayBuffer(), {
@@ -147,12 +167,14 @@ async function networkFirst(request) {
   try {
     const response = await fetch(request)
     if (response.ok) {
+      markOnline()
       const cache = await caches.open(CACHE_NAME)
       cache.put(request, response.clone())
     }
     return response
   }
   catch {
+    markOffline()
     const cached = await caches.match(request)
     if (cached) return cached
 

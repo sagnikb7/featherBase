@@ -37,6 +37,8 @@ const hasNext = ref(false)
 const currentPage = ref(1)
 const totalCount = ref(0)
 const birdOfTheDay = ref<any>(null)
+const botdLoading = ref(true)
+let botdStarted = false
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -85,6 +87,9 @@ async function fetchBirdOfTheDay(total: number) {
   catch {
     // non-critical
   }
+  finally {
+    botdLoading.value = false
+  }
 }
 
 async function fetchBirds(page = 1) {
@@ -107,8 +112,13 @@ async function fetchBirds(page = 1) {
       hasNext.value = result.pagination.hasNext
       currentPage.value = result.pagination.page
       totalCount.value = result.pagination.total
-      if (isFirstPage && !selectedGroup.value && !birdOfTheDay.value)
-        fetchBirdOfTheDay(result.pagination.total)
+      if (isFirstPage) {
+        localStorage.setItem('featherbase-bird-total', String(result.pagination.total))
+        if (!selectedGroup.value && !botdStarted) {
+          botdStarted = true
+          fetchBirdOfTheDay(result.pagination.total)
+        }
+      }
     }
     else {
       throw new Error('Failed to fetch birds data')
@@ -202,6 +212,13 @@ onMounted(() => {
   )
 
   fetchGroups()
+
+  const cachedTotal = localStorage.getItem('featherbase-bird-total')
+  if (cachedTotal && !selectedGroup.value) {
+    botdStarted = true
+    fetchBirdOfTheDay(Number(cachedTotal))
+  }
+
   fetchBirds()
 
   watch(sentinel, (el, previousEl) => {
@@ -312,6 +329,16 @@ onUnmounted(() => {
       </div>
       <div v-if="error" class="status-box error" role="alert">
         {{ error }}
+      </div>
+    </div>
+
+    <div v-if="botdLoading && !selectedGroup" class="botd-skeleton" aria-hidden="true">
+      <div class="botd-skeleton-eyebrow" />
+      <div class="botd-skeleton-name" />
+      <div class="botd-skeleton-scientific" />
+      <div class="botd-skeleton-footer">
+        <div class="botd-skeleton-meta" />
+        <div class="botd-skeleton-cta" />
       </div>
     </div>
 
