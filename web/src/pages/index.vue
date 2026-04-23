@@ -280,18 +280,27 @@ onUnmounted(() => {
               v-for="bird in searchResults"
               :key="bird.id"
               :href="`/bird/${bird.id}`"
-              class="search-result"
+              class="bird-row"
+              :style="{ '--row-accent': groupColor(bird.commonGroup).text, '--row-accent-bg': groupColor(bird.commonGroup).bg }"
             >
-              <span class="search-result-serial">{{ formatSerial(bird.serialNumber) }}</span>
-              <div class="search-result-info">
-                <span class="search-result-name">{{ bird.name }}</span>
-                <span class="search-result-scientific">{{ bird.scientificName }}</span>
+              <div class="bird-row-info">
+                <span class="bird-row-name">{{ bird.name }}</span>
+                <span class="bird-row-scientific">
+                  <span class="bird-row-serial">{{ formatSerial(bird.serialNumber) }}</span>
+                  · {{ bird.scientificName }}
+                </span>
+                <span
+                  v-if="bird.commonGroup"
+                  class="bird-row-group bird-row-group--mobile capitalize"
+                  :style="{ background: groupColor(bird.commonGroup).bg, color: groupColor(bird.commonGroup).text }"
+                >{{ bird.commonGroup }}</span>
               </div>
               <span
                 v-if="bird.commonGroup"
-                class="search-result-group capitalize"
+                class="bird-row-group capitalize"
                 :style="{ background: groupColor(bird.commonGroup).bg, color: groupColor(bird.commonGroup).text }"
               >{{ bird.commonGroup }}</span>
+              <div i-ph-caret-right class="bird-row-arrow" />
             </a>
           </template>
           <div v-else class="search-dropdown-status">
@@ -394,6 +403,11 @@ onUnmounted(() => {
             <span class="bird-row-serial">{{ formatSerial(bird.serialNumber) }}</span>
             · {{ bird.scientificName }}
           </span>
+          <span
+            v-if="bird.commonGroup"
+            class="bird-row-group bird-row-group--mobile capitalize"
+            :style="{ background: groupColor(bird.commonGroup).bg, color: groupColor(bird.commonGroup).text }"
+          >{{ bird.commonGroup }}</span>
         </div>
         <span
           v-if="bird.commonGroup"

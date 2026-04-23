@@ -140,14 +140,25 @@ featherBase/
 | `GET` | `/v1.0/birds/groups` | — | All bird group names (cached 1h) |
 | `GET` | `/v1.0/birds/:id` | — | Full bird details + image metadata |
 
-The `search` param (min 3 chars) does case-insensitive matching on `name` and `scientificName`. If the term is a plain integer (e.g. `300`), it also matches `serialNumber` exactly. All filter inputs are regex-escaped to prevent injection.
+### Search behaviour
+
+| Input type | Rule | Example |
+|---|---|---|
+| Plain integer | Exact `serialNumber` match only — no text conditions | `?search=5` → bird #5 |
+| Text (≥ 3 chars) | Word-boundary prefix regex on `name` and `scientificName`, plus taxonomic prefix resolution (see below) | `?search=owl` |
+
+**Word-boundary prefix** (`\b<query>`, case-insensitive): matches any position where a word *starts with* the query. `owl` matches "Barn **Owl**", "**Owlet**", "ako-**owl**" but not "Surf**owl**" (no word boundary before it). For `scientificName` the same rule covers both genus and species, so `axi` matches "**Axi**s baku" and "Baku **axi**s" but not "Per**axi**s baku".
+
+**Taxonomic prefix resolution**: on startup the backend caches all distinct `order`, `family`, and `commonGroup` values (1h TTL, same NodeCache used for groups). When a text search arrives, the query is prefix-matched against each list (case-insensitive). Matches are expanded into exact `$in` filter clauses and added to the `$or` alongside the name/scientificName regex. `Gall` → `{ order: { $in: ["Galliformes"] } }`. `rina` alone does not match `Andorina`. A query like `Gee` that hits "Geese" (group) and "Geezos" (family) adds both clauses, so birds from either category appear alongside any name/scientific matches.
+
+`group`, `family`, and `order` query params are still supported as standalone exact-match filters (used by the group chip UI).
 
 ---
 
 ## Frontend Features
 
-- **Pokédex list** — compact rows: name on the first line (full width), `#0001 · Scientific name` on the second. Group color tag visible on desktop, hidden on mobile to maximise name legibility
-- **API-powered search** — debounced 300ms; triggers at 1 character for numeric (serial number) queries, 3 characters for text
+- **Pokédex list** — compact rows: name on the first line, `#0001 · Scientific name` on the second, group color chip on the right (desktop) or third line (mobile)
+- **API-powered search** — debounced 300ms; triggers at 1 character for numeric queries, 3 characters for text. Dropdown results share the same row layout as the list
 - **Image carousel** — swipe through all images of a species, with dot indicators and tag labels (adult, juvenile, male, etc.)
 - **IUCN status chips** — colored dot + code + label (LC through EX), pulse animation on critical statuses
 - **Group color hashing** — deterministic djb2 hash maps each group name to a 10-color earthy palette, consistent across list and detail views

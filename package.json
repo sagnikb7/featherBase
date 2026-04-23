@@ -26,7 +26,8 @@
     "insert-birds": "node --env-file=.env src/scripts/insert-birds.js",
     "lint:fix": "eslint 'index.js' 'src/**/*.js?(x)' --fix",
     "prepare": "husky",
-    "build:FE": "cd web && npx pnpm@latest i && npx pnpm@latest build"
+    "build:FE": "cd web && npx pnpm@latest i && npx pnpm@latest build",
+    "test": "node --test --experimental-test-module-mocks src/tests/*.test.js"
   },
   "keywords": [
     "birds",

@@ -20,7 +20,7 @@ function loadSettings(): Settings {
     }
   }
   catch {}
-  return { theme: 'auto', midnightUnlocked: false }
+  return { theme: 'dark', midnightUnlocked: false }
 }
 
 function saveSettings(s: Settings) {
