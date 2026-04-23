@@ -4,6 +4,8 @@ import { getRarity } from './rarity'
 import type { Bird } from '~/types/common'
 
 const APP_URL = 'featherbase.netlify.app'
+const BOTD_GOLD = '#F5C518'
+const BOTD_GOLD_BG = 'rgba(0, 0, 0, 0.60)'
 
 const W = 630
 const H = 880
@@ -76,7 +78,7 @@ function ellipsis(ctx: CanvasRenderingContext2D, text: string, max: number): str
   return `${t}…`
 }
 
-export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> {
+export async function generateCard(bird: Bird, imageUrl: string, botd = false): Promise<Blob> {
   const rarity = bird.rarity || 1
   const rarityInfo = getRarity(rarity)
   const tier = TIERS[rarity] || TIERS[1]
@@ -180,10 +182,39 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
   ctx.fillStyle = '#E8E8E8'
   ctx.fillText(serial, imgX + 24, imgY + 14 + 21)
 
+  // BOTD "TODAY" pill — top-right of image
+  if (botd) {
+    const todayText = '✦ TODAY'
+    ctx.font = '700 14px Manrope, sans-serif'
+    const todayW = ctx.measureText(todayText).width + 20
+    ctx.beginPath()
+    ctx.roundRect(imgX + imgW - 14 - todayW, imgY + 14, todayW, 30, 5)
+    ctx.fillStyle = BOTD_GOLD_BG
+    ctx.fill()
+    ctx.fillStyle = BOTD_GOLD
+    ctx.textAlign = 'left'
+    ctx.fillText(todayText, imgX + imgW - 14 - todayW + 10, imgY + 14 + 21)
+  }
+
   // ── Info section ──
   const infoX = PAD
   const contentW = W - PAD * 2
   let y = infoY + 10
+
+  // BOTD eyebrow — "BIRD OF THE DAY · DD MMM YYYY"
+  if (botd) {
+    const now = new Date()
+    const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
+    const eyebrow = `✦  BIRD OF THE DAY  ·  ${dateStr}`
+    ctx.font = '700 11px Manrope, sans-serif'
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'alphabetic'
+    ctx.fillStyle = BOTD_GOLD
+    ctx.letterSpacing = '1.5px'
+    ctx.fillText(eyebrow, infoX, y + 14)
+    ctx.letterSpacing = '0px'
+    y += 26
+  }
 
   // Bird name
   ctx.textAlign = 'left'
@@ -268,8 +299,8 @@ export async function generateCard(bird: Bird, imageUrl: string): Promise<Blob> 
   )
 }
 
-export async function shareBirdCard(bird: Bird, imageUrl: string) {
-  const blob = await generateCard(bird, imageUrl)
+export async function shareBirdCard(bird: Bird, imageUrl: string, botd = false) {
+  const blob = await generateCard(bird, imageUrl, botd)
   const file = new File([blob], `featherbase-${bird.serialNumber}.png`, { type: 'image/png' })
 
   if (navigator.share && navigator.canShare?.({ files: [file] })) {

@@ -31,7 +31,7 @@ async function share() {
 
   sharing.value = true
   try {
-    await shareBirdCard(currentBird.value, currentImageUrl.value)
+    await shareBirdCard(currentBird.value, currentImageUrl.value, isBotd(currentBird.value.serialNumber))
   }
   finally {
     sharing.value = false

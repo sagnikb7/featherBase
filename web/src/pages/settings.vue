@@ -88,7 +88,7 @@ async function spreadTheWord() {
     if (birdData.success && birdData.data) {
       const bird = birdData.data
       const imgUrl = bird.meta?.images?.[0]?.cdn ?? ''
-      await shareBirdCard(bird, imgUrl)
+      await shareBirdCard(bird, imgUrl, true)
       spreadResult.value = 'pending'
     }
     else {
