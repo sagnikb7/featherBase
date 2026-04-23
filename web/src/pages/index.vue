@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { baseUrl, formatSerial, groupColor } from '~/composables'
+import { baseUrl, formatSerial, groupColor, saveBotdSerial } from '~/composables'
 
 interface GroupEntry { title: string, count: number }
 
@@ -77,8 +77,10 @@ async function fetchBirdOfTheDay(total: number) {
   try {
     const response = await fetch(`${baseUrl}/v1.0/birds/${serial}`)
     const result = await response.json()
-    if (result.success && result.data?.serialNumber)
+    if (result.success && result.data?.serialNumber) {
       birdOfTheDay.value = result.data
+      saveBotdSerial(result.data.serialNumber)
+    }
   }
   catch {
     // non-critical

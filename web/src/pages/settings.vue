@@ -19,14 +19,29 @@ const clearing = ref(false)
 const cacheSize = ref<string | null>(null)
 
 async function loadCacheSize() {
-  if (!navigator.storage?.estimate)
-    return
-  const { usage } = await navigator.storage.estimate()
-  if (usage == null)
-    return
-  cacheSize.value = usage < 1024 * 1024
-    ? `${(usage / 1024).toFixed(1)} KB`
-    : `${(usage / (1024 * 1024)).toFixed(1)} MB`
+  try {
+    const keys = await caches.keys()
+    let total = 0
+    for (const key of keys) {
+      const cache = await caches.open(key)
+      const requests = await cache.keys()
+      await Promise.all(requests.map(async (req) => {
+        const resp = await cache.match(req)
+        if (resp) {
+          const buf = await resp.clone().arrayBuffer()
+          total += buf.byteLength
+        }
+      }))
+    }
+    cacheSize.value = total === 0
+      ? null
+      : total < 1024 * 1024
+        ? `${(total / 1024).toFixed(1)} KB`
+        : `${(total / (1024 * 1024)).toFixed(1)} MB`
+  }
+  catch {
+    // non-critical
+  }
 }
 
 onMounted(() => {

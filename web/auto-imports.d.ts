@@ -45,6 +45,7 @@ declare global {
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
+  const isBotd: typeof import('./src/composables/botd')['isBotd']
   const isDark: typeof import('./src/composables/settings')['isDark']
   const isDefined: typeof import('@vueuse/core')['isDefined']
   const isProxy: typeof import('vue')['isProxy']
@@ -92,6 +93,7 @@ declare global {
   const resolveComponent: typeof import('vue')['resolveComponent']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
   const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
+  const saveBotdSerial: typeof import('./src/composables/botd')['saveBotdSerial']
   const setTheme: typeof import('./src/composables/settings')['setTheme']
   const settings: typeof import('./src/composables/settings')['settings']
   const shallowReactive: typeof import('vue')['shallowReactive']
@@ -349,6 +351,7 @@ declare module 'vue' {
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
+    readonly isBotd: UnwrapRef<typeof import('./src/composables/botd')['isBotd']>
     readonly isDark: UnwrapRef<typeof import('./src/composables/settings')['isDark']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
@@ -396,6 +399,7 @@ declare module 'vue' {
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
     readonly resolveUnref: UnwrapRef<typeof import('@vueuse/core')['resolveUnref']>
+    readonly saveBotdSerial: UnwrapRef<typeof import('./src/composables/botd')['saveBotdSerial']>
     readonly setTheme: UnwrapRef<typeof import('./src/composables/settings')['setTheme']>
     readonly settings: UnwrapRef<typeof import('./src/composables/settings')['settings']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
@@ -646,6 +650,7 @@ declare module '@vue/runtime-core' {
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
+    readonly isBotd: UnwrapRef<typeof import('./src/composables/botd')['isBotd']>
     readonly isDark: UnwrapRef<typeof import('./src/composables/settings')['isDark']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
@@ -693,6 +698,7 @@ declare module '@vue/runtime-core' {
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
     readonly resolveUnref: UnwrapRef<typeof import('@vueuse/core')['resolveUnref']>
+    readonly saveBotdSerial: UnwrapRef<typeof import('./src/composables/botd')['saveBotdSerial']>
     readonly setTheme: UnwrapRef<typeof import('./src/composables/settings')['setTheme']>
     readonly settings: UnwrapRef<typeof import('./src/composables/settings')['settings']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>

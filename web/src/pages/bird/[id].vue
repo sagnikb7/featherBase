@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Bird, Image, SingleBirdResponse } from '~/types/common'
-import { baseUrl, formatSerial, getRarity, groupColor, shareBirdCard, useIucnStatus } from '~/composables'
+import { baseUrl, formatSerial, getRarity, groupColor, isBotd, shareBirdCard, useIucnStatus } from '~/composables'
 import BirdImage from '~/components/BirdImage.vue'
 
 const route = useRoute()
@@ -252,6 +252,10 @@ watch(
         >
           <span i-ph-star-fill class="rarity-star" />
           {{ getRarity(currentBird.rarity).label }}
+        </span>
+        <span v-if="isBotd(currentBird.serialNumber)" class="botd-chip">
+          <span i-ph-sun-horizon-duotone class="botd-chip-icon" />
+          Bird of the Day
         </span>
         <span v-if="!currentBird.verification" class="unverified-chip" title="This record hasn't been cross-checked against eBird yet">
           <span i-ph-warning class="unverified-icon" />
